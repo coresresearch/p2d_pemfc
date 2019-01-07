@@ -347,7 +347,7 @@ surface_reaction( "2 H(Naf) + 2 electron <=> H2(Naf)", [2.0e-5, 0, 13683], beta=
 surface_reaction( "4 H(Naf) + O2(Naf) + 4 electron + 2 PT(S) <=> 2 H2O(S)", [5e52, 0, 23000], beta=0.5, id="catsurf_ca-1")
 
 #  Oxygen transfer between gas and Nafion - set to be fast
-surface_reaction( "O2 <=> O2(Naf)", [2e15,0,1000], id="elyte_ca-1")
+surface_reaction( "O2 <=> O2(Naf)", [2e10,0,1000], id="elyte_ca-1") #[2e15,0,1000], id="elyte_ca-1")
 
 #  Hydrogen transfer between gas and Nafion - set to be fast
 surface_reaction( "H2 <=> H2(Naf)", [2e20,0,1000], id="elyte_an-1")
