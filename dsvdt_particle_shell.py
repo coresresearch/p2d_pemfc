@@ -1,13 +1,13 @@
 """ Import needed modules """
 "-----------------------------------------------------------------------------"
-from pemfc_transport_funcs import fickian_ADF
+from pemfc_gas_transport_funcs import fickian_adf
 import cantera as ct
 import numpy as np
 import sys
 
 """ Define ODE for Solution """
 "-----------------------------------------------------------------------------"
-def dSVdt_func(t, SV, objs, params, ptrs):
+def dsvdt_func(t, SV, objs, params, ptrs):
     # Toggles to turn on/off inner/outer reactions and gas transport:----------
     i_rxn = 1
     o_rxn = 1
@@ -28,7 +28,7 @@ def dSVdt_func(t, SV, objs, params, ptrs):
     dSVdt = np.zeros_like(SV)
 
     " Tracking variables for SV spacing - done for looping "
-    SV_shift = 0 # Start with the first node (GDL -> Elyte, carbon -> gas)
+    SV_shift = 0 # Start with the first node (y:GDL -> Elyte, r:carbon -> gas)
     SV_spacing = int(len(params['SV_0'])*params['Ny_inv'])
 
     """ Boundary Condition - CC side with O2 flow """
@@ -42,7 +42,7 @@ def dSVdt_func(t, SV, objs, params, ptrs):
     rho_gas_array = SV[SVptr['rho_gas_k']]
     TDY_1 = SV[SVptr['temp']], sum(rho_gas_array), rho_gas_array
 
-    flux_gas_up = fickian_ADF(TDY_BC, TDY_1, gas_ca, params, gas_toggle)
+    flux_gas_up = fickian_adf(TDY_BC, TDY_1, gas_ca, params, gas_toggle)
 
     # Density of naf species initialization:-----------------------------------
     naf_shift = naf_bulk_ca.n_species-1
@@ -104,7 +104,7 @@ def dSVdt_func(t, SV, objs, params, ptrs):
         rho_gas_array = SV[SVptr['rho_gas_k']+SV_shift+SV_spacing]
         TDY_2 = T_ca, sum(rho_gas_array), rho_gas_array
 
-        flux_gas_down = fickian_ADF(TDY_1, TDY_2, gas_ca, params, gas_toggle)
+        flux_gas_down = fickian_adf(TDY_1, TDY_2, gas_ca, params, gas_toggle)
 
         dSVdt[SVptr['rho_gas_k']+SV_shift] = params['eps_gas_inv']\
                   * params['A_pv_naf_gas_int']*sdot_nafs_gas\
@@ -233,16 +233,9 @@ def dSVdt_func(t, SV, objs, params, ptrs):
 
 #    print(t)
 #    print(SV[SVptr['phi_dl']::SV_spacing])
-#    print(dSVdt[SVptr['phi_dl']::SV_spacing])
-#    for i in range(gas_ca.n_species):
-#        print(gas_ca.species_names[i], SV[SVptr['rho_gas_k'][i]::SV_spacing])
-#        print(gas_ca.species_names[i], dSVdt[SVptr['rho_gas_k'][i]::SV_spacing])
 
-#    try:
-#        user_input = input()
-#        if user_input == 'c':
-#            sys.exit(0)
-#    except KeyboardInterrupt:
+#    user_in = input('"Enter" to continue or "Ctrl+d" to cancel.')   
+#    if user_in == KeyboardInterrupt:
 #        sys.exit(0)
 
     return dSVdt

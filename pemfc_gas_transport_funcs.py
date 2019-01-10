@@ -5,7 +5,7 @@ Transport functions used in pemfc particle-shell model:
     
 import numpy as np
 
-def fickian_ADF(TDY1, TDY2, gas, params, toggle):
+def fickian_adf(TDY1, TDY2, gas, params, toggle):
     # set state 1 properties:
     gas.TDY = TDY1
     D_k1 = gas.mix_diff_coeffs_mass
