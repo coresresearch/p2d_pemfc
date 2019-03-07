@@ -1,19 +1,19 @@
 """ Import needed modules """
 "-----------------------------------------------------------------------------"
-import os, sys
+import os, sys, csv
 import numpy as np
-import pylab as plt
 import cantera as ct
 from shutil import copy2, rmtree
-from scipy.integrate import solve_ivp
-from particle_shell_pemfc_inputs import *
+from pemfc_property_funcs import *
+
+
 
 """ Set up saving location """
 "-----------------------------------------------------------------------------"
 cwd = os.getcwd()
 
 # Create folder for any files/outputs to be saved:
-if all([os.path.exists(folder_name), save != 0]):
+if all([os.path.exists(folder_name), save == 1]):
     print('\nWARNING: folder_name already exists. Files will be overwritten.')
     print('\n"Enter" to continue and overwrite or "Ctrl+c" to cancel.')
     print('In a GUI, e.g. Spyder, "Ctrl+d" may be needed to cancel.')
@@ -23,399 +23,275 @@ if all([os.path.exists(folder_name), save != 0]):
     else:
         rmtree(folder_name)
         os.makedirs(folder_name)
-        copy2(os.path.basename(__file__), folder_name)
-        copy2(cwd + '/particle_shell_pemfc_inputs.py', folder_name)
-        copy2(cwd + '/dsvdt_particle_shell.py', folder_name)
-        copy2(cwd + '/pemfc_gas_transport_funcs.py', folder_name)
+        copy2(cwd + '/particle_shell_pemfc_runner.py', folder_name)
+        copy2(cwd + '/particle_shell_pemfc_pre.py', folder_name)
+        copy2(cwd + '/particle_shell_pemfc_dsvdt.py', folder_name)
+        copy2(cwd + '/particle_shell_pemfc_post.py', folder_name)
+        copy2(cwd + '/pemfc_transport_funcs.py', folder_name)
+        copy2(cwd + '/pemfc_property_funcs.py', folder_name)
         
-elif save != 0:
+elif save == 1:
     os.makedirs(folder_name)
-    copy2(os.path.basename(__file__), folder_name)
-    copy2(cwd + '/particle_shell_pemfc_inputs.py', folder_name)
-    copy2(cwd + '/dsvdt_particle_shell.py', folder_name)
-    copy2(cwd + '/pemfc_gas_transport_funcs.py', folder_name)
+    copy2(cwd + '/particle_shell_pemfc_runner.py', folder_name)
+    copy2(cwd + '/particle_shell_pemfc_pre.py', folder_name)
+    copy2(cwd + '/particle_shell_pemfc_dsvdt.py', folder_name)
+    copy2(cwd + '/particle_shell_pemfc_post.py', folder_name)
+    copy2(cwd + '/pemfc_transport_funcs.py', folder_name)
+    copy2(cwd + '/pemfc_property_funcs.py', folder_name)
 
-# Save the current function and cti files into new folder:
+# Save the current cti files into new folder:
 cti_path = ct.__path__[0]
-if all([os.path.exists(ctifile), save != 0]):
+if all([os.path.exists(ctifile), save == 1]):
     copy2(ctifile, folder_name)
-elif save != 0:
+elif save == 1:
     copy2(cti_path + '/data/' + ctifile, folder_name)
+    
+    
     
 """ Pre-load Phases and Set States """
 "-----------------------------------------------------------------------------"
 # Cathode Phases:
-metal_ca = ct.Solution(ctifile, 'metal')
-metal_ca.TP = T_ca, P_ca
+carb_ca = ct.Solution(ctifile, 'metal')
+carb_ca.TP = T_ca, P_ca
 
 gas_ca = ct.Solution(ctifile, 'cathode_gas')
 gas_ca.TP = T_ca, P_ca
 
-naf_bulk_ca = ct.Solution(ctifile, 'naf_bulk_ca')
-naf_bulk_ca.TP = T_ca, P_ca
+naf_b_ca = ct.Solution(ctifile, 'naf_bulk_ca')
+naf_b_ca.TP = T_ca, P_ca
 
-Pt_surf_ca = ct.Interface(ctifile, 'Pt_surf_ca', [metal_ca, naf_bulk_ca])
-Pt_surf_ca.TP = T_ca, P_ca
+pt_s_ca = ct.Interface(ctifile, 'Pt_surf_ca', [carb_ca, naf_b_ca])
+pt_s_ca.TP = T_ca, P_ca
 
-naf_surf_ca = ct.Interface(ctifile, 'naf_surf_ca', [naf_bulk_ca, gas_ca])
-naf_surf_ca.TP = T_ca, P_ca
+naf_s_ca = ct.Interface(ctifile, 'naf_surf_ca', [naf_b_ca, gas_ca])
+naf_s_ca.TP = T_ca, P_ca
 
 # Anode Phases:
-metal_an = ct.Solution(ctifile, 'metal')
-metal_an.TP = T_an, P_an
+carb_an = ct.Solution(ctifile, 'metal')
+carb_an.TP = T_an, P_an
 
 gas_an = ct.Solution(ctifile, 'anode_gas')
 gas_an.TP = T_an, P_an
 
-naf_bulk_an = ct.Solution(ctifile, 'naf_bulk_an')
-naf_bulk_an.TP = T_an, P_an
+naf_b_an = ct.Solution(ctifile, 'naf_bulk_an')
+naf_b_an.TP = T_an, P_an
 
-Pt_surf_an = ct.Interface(ctifile, 'Pt_surf_an', [metal_an, naf_bulk_an])
-Pt_surf_an.TP = T_an, P_an
+pt_s_an = ct.Interface(ctifile, 'Pt_surf_an', [carb_an, naf_b_an])
+pt_s_an.TP = T_an, P_an
 
-naf_surf_an = ct.Interface(ctifile, 'naf_surf_an', [naf_bulk_an, gas_an])
-naf_surf_an.TP = T_an, P_an
+naf_s_an = ct.Interface(ctifile, 'naf_surf_an', [naf_b_an, gas_an])
+naf_s_an.TP = T_an, P_an
 
 " For ease and clarity, let's store phases in a common 'obj' dict: "
 obj = {} # Done for passing phases to external functions (ex: dSVdt)
-obj['metal_ca'] = metal_ca
+obj['carb_ca'] = carb_ca
 obj['gas_ca'] = gas_ca
-obj['naf_bulk_ca'] = naf_bulk_ca
-obj['Pt_surf_ca'] = Pt_surf_ca
-obj['naf_surf_ca'] = naf_surf_ca
+obj['naf_b_ca'] = naf_b_ca
+obj['pt_s_ca'] = pt_s_ca
+obj['naf_s_ca'] = naf_s_ca
 
-obj['metal_an'] = metal_an
+obj['carb_an'] = carb_an
 obj['gas_an'] = gas_an
-obj['naf_bulk_an'] = naf_bulk_an
-obj['Pt_surf_an'] = Pt_surf_an
-obj['naf_surf_an'] = naf_surf_an
+obj['naf_b_an'] = naf_b_an
+obj['pt_s_an'] = pt_s_an
+obj['naf_s_an'] = naf_s_an
+
+
 
 """ Pointers for Generality """
 "-----------------------------------------------------------------------------"
 # Pointers in Solution Vector:
-SVptr = {}
-SVptr['phi_dl'] = 0
-SVptr['temp'] = 1
-state_vars = len(SVptr) # put all single-node state variables above ^
+iSV = {}
+iSV['phi_dl'] = 0
+iSV['T'] = 1
+v_1d = len(iSV)
+# put all single-node CL state variables above ^
 
-SVptr['rho_n1'] = np.arange(state_vars, state_vars+naf_bulk_ca.n_species-1)
+iSV['rho_n1'] = np.arange(v_1d, v_1d + naf_b_ca.n_species-1)
+iSV['rho_naf_k'] = np.arange(v_1d, v_1d + (naf_b_ca.n_species-1)*Nr)
 
-SVptr['rho_naf_k'] = np.arange(state_vars,
-                     state_vars+(naf_bulk_ca.n_species-1)*Nr)
+iSV['rho_gas_k'] = np.arange(iSV['rho_naf_k'][-1] +1,
+                             iSV['rho_naf_k'][-1] +1 +gas_ca.n_species)
 
-SVptr['rho_gas_k'] = np.arange(state_vars+(naf_bulk_ca.n_species-1)*Nr,
-                     state_vars+(naf_bulk_ca.n_species-1)*Nr+gas_ca.n_species)
+iSV['T_gdl'] = (iSV['rho_gas_k'][-1] +1)*Ny
+iSV['rho_gdl_k'] = np.arange(iSV['T_gdl'] +1, iSV['T_gdl'] +1 +gas_ca.n_species)
 
-# Pointers in Production Rates:
-Ptptr = {}
-Ptptr['metal'] = np.arange(0, metal_ca.n_species)
-Ptptr['Naf'] = np.arange(metal_ca.n_species+1,
-                          metal_ca.n_species+naf_bulk_ca.n_species) # +1 neg H+
-Ptptr['int'] = np.arange(metal_ca.n_species+naf_bulk_ca.n_species,
-               len(Pt_surf_ca.net_production_rates))
+# Pointers in Production Rates (H+ neglected since constant density):
+iPt = {}
+iPt['carb'] = np.arange(0, carb_ca.n_species)
+iPt['Naf'] = np.arange(iPt['carb'][-1] +2, iPt['carb'][-1] +1 +naf_b_ca.n_species)
+iPt['int'] = np.arange(iPt['Naf'][-1] +1, len(pt_s_ca.net_production_rates))
 
-Nafptr = {}
-Nafptr['Naf'] = np.arange(0+1, naf_bulk_ca.n_species) # +1 neglects H+
-Nafptr['gas'] = np.arange(naf_bulk_ca.n_species,
-                           naf_bulk_ca.n_species+gas_ca.n_species)
-Nafptr['int'] = np.arange(naf_bulk_ca.n_species+gas_ca.n_species,
-                len(naf_surf_ca.net_production_rates))
+iNaf = {}
+iNaf['Naf'] = np.arange(0 +1, naf_b_ca.n_species)
+iNaf['gas'] = np.arange(iNaf['Naf'][-1] +1, iNaf['Naf'][-1] +1 +gas_ca.n_species)
+iNaf['int'] = np.arange(iNaf['gas'][-1] +1, len(naf_s_ca.net_production_rates))
 
 # Dictionary to pass all pointers to dSVdt function:
 ptrs = {}
-ptrs['SVptr'] = SVptr
-ptrs['Nafptr'] = Nafptr
-ptrs['Ptptr'] = Ptptr
+ptrs['iSV'] = iSV
+ptrs['iNaf'] = iNaf
+ptrs['iPt'] = iPt
+
+
 
 """ Pre-Processing and Initialization """
 "-----------------------------------------------------------------------------"
 " Determine SV length/initialize "
-SV_0 = np.zeros((state_vars+(naf_bulk_ca.n_species-1)*Nr+gas_ca.n_species)*Ny)
+SV_0 = np.zeros((v_1d + (naf_b_ca.n_species -1)*Nr + gas_ca.n_species)*Ny
+                + (1 + gas_ca.n_species)*Ny_gdl)
 
 # Change basis to ensure TDY density takes in mass units:
 basis = 'mass'
 
 # Set each phase to mass basis:
-naf_bulk_ca.basis = basis
-metal_ca.basis = basis
+naf_b_ca.basis = basis
+carb_ca.basis = basis
 gas_ca.basis = basis
-Pt_surf_ca.basis = basis
-naf_surf_ca.basis = basis
+pt_s_ca.basis = basis
+naf_s_ca.basis = basis
 
 # Set point for cathode gas phase BC (O2 flow channel):
 TPY_ca_BC = T_ca_BC, P_ca_BC, Y_ca_BC
 
 # Initialize all nodes according to cti and user inputs:
-SV_0_state_vars = [phi_ca_init, gas_ca.T]
-
-SV_0_naf_rhos = np.tile(naf_bulk_ca.density_mass
-                        * naf_bulk_ca.Y[Nafptr['Naf']], Nr)
+SV_0_v_1d = [phi_ca_init, gas_ca.T]
+SV_0_naf_k = np.tile(naf_b_ca.density_mass*naf_b_ca.Y[iNaf['Naf']], Nr)
 
 gas_ca.TPY = TPY_ca_BC
-SV_0_gas_rhos = gas_ca.density_mass*gas_ca.Y
+SV_0_gas_k = gas_ca.density_mass*gas_ca.Y
+SV_0_cl = np.tile(np.hstack((SV_0_v_1d, SV_0_naf_k, SV_0_gas_k)), Ny)
+SV_0_gdl = np.tile(np.hstack((gas_ca.T, SV_0_gas_k)), Ny_gdl)
 
-SV_0 = np.tile(np.hstack((SV_0_state_vars, SV_0_naf_rhos, SV_0_gas_rhos)), Ny)
+SV_0 = np.hstack([SV_0_cl, SV_0_gdl])
+
+L_cl = int(len(SV_0_cl))
+L_gdl = int(len(SV_0_gdl))
 
 " Geometric parameters "
-# Area of naf/gas interface per total volume [m^2 Naf-gas int / m^3 tot]
-A_pv_naf_gas_int = 3*(1 - eps_gas) / (r_c + t_naf)
-
-# Pt surface area per total volume [m^2 Pt / m^3 tot]
-A_pv_surf_Pt = 3*(1 - eps_gas)*r_c**2*p_Pt / (r_c + t_naf)**3
-
-# Cathode surface area per total volume [m^2 cathode / m^3 tot]
-A_pv_ca_naf_int = 3*(1 - eps_gas)*r_c**2 / (r_c + t_naf)**3
-
-# Volume fraction of nafion [-]
-eps_naf = ((r_c+t_naf)**3 - r_c**3)*(1-eps_gas) / (r_c+t_naf)**3
+if area_calcs == 0: # Calcs for areas based on % Pt and flat circles
+    # Area of naf/gas interface per total volume [m^2 Naf-gas int / m^3 tot]
+    SA_pv_naf = 3*(1 - eps_gas) / (r_c+t_naf)
+    
+    # Pt surface area per total volume [m^2 Pt / m^3 tot]
+    SA_pv_pt = 3*(1 - eps_gas)*r_c**2*(p_Pt/100) / (r_c+t_naf)**3
+    
+    # Cathode surface area per total volume [m^2 cathode / m^3 tot]
+    SA_pv_carb = 3*(1 - eps_gas)*r_c**2 / (r_c+t_naf)**3
+    
+    # Volume fraction of nafion [-]
+    eps_naf = ((r_c+t_naf)**3 - r_c**3)*(1 - eps_gas) / (r_c+t_naf)**3
+    
+    print('\nt_naf:',t_naf, 'V% gas:',eps_gas, 'V% naf:',eps_naf, '%Pt:',p_Pt)
+    print('A_int:',SA_pv_naf, 'A_C:',SA_pv_carb, 'A_Pt:',SA_pv_pt)
+    
+elif area_calcs == 1: # Calcs for areas based on Pt-loading and 1/2 spheres
+    SA_Pt_agg, SA_C_int, SA_naf_int, V_naf, V_agg = \
+       rxn_areas(w_Pt, t_ca, eps_gas, t_naf, r_c, r_Pt, rho_Pt)
+    
+    SA_pv_naf = (1 - eps_gas)*SA_naf_int / V_agg
+    
+    SA_pv_pt = (1 - eps_gas)*SA_Pt_agg / V_agg
+    
+    SA_pv_carb = (1 - eps_gas)*SA_C_int / V_agg
+    
+    eps_naf = (1 - eps_gas)*V_naf / V_agg
+    
+elif area_calcs == 2: # Assume only gas phase changes as t_naf changes
+    eps_gas = 1 - (SA_pv_carb *(r_c + t_naf)**3 / (3 *r_c**2))
+    eps_naf = ((r_c+t_naf)**3 - r_c**3)*(1-eps_gas) / (r_c+t_naf)**3
+    SA_pv_naf = 3*(1 - eps_gas) / (r_c+t_naf)
+    
+    print('\nt_naf:',t_naf, 'V% gas:',eps_gas, 'V% naf:',eps_naf, '%Pt:',p_Pt)
+    print('A_int:',SA_pv_naf, 'A_C:',SA_pv_carb, 'A_Pt:',SA_pv_pt)
+    
+elif area_calcs == 3: # Assume only carbon phase changes as t_naf changes
+    r_c = 3*(1 - eps_gas) / SA_pv_naf - t_naf
+    p_Pt = SA_pv_pt*(r_c+t_naf)**3 / (3*(1 - eps_gas)*r_c**2)
+    SA_pv_carb = SA_pv_pt / p_Pt
+    eps_naf = ((r_c+t_naf)**3 - r_c**3)*(1 - eps_gas) / (r_c+t_naf)**3
+        
+    print('\nt_naf:',t_naf, 'V% gas:',eps_gas, 'V% naf:',eps_naf, '%Pt:',p_Pt)
+    print('A_int:',SA_pv_naf, 'A_C:',SA_pv_carb, 'A_Pt:',SA_pv_pt)
 
 # Tortuosity calculation via Bruggeman correlation [-]:
 tau_gas = eps_gas**(-0.5)
+tau_gdl = eps_gdl**(-0.5)
 
 # Radius vectors for diffusion calculations [m]
-r_nodes = np.linspace(r_c+t_naf/(Nr+1), (r_c+t_naf)-t_naf/(Nr+1), Nr)
-t_shells = np.tile(t_naf/Nr, Nr)
-delta_rs = np.diff(r_nodes)
+r_j = np.linspace(r_c+t_naf/(Nr+1), (r_c+t_naf)-t_naf/(Nr+1), Nr)
+t_shl = np.tile(t_naf/Nr, Nr)
+dr = np.diff(r_j)
 
-r_bounds = np.zeros(Nr-1)
+r_jph = np.zeros(Nr-1)
 for i in range(Nr-1):
-    r_bounds[i] = np.mean(r_nodes[i:i+2])
-
-# Vertical discretization spacing:
-dy = t_ca / Ny
+    r_jph[i] = np.mean(r_j[i:i+2])
 
 " Calculate the anode equilibrium potential for polarization curves "
-Delta_gibbs_an = Pt_surf_an.delta_gibbs
-Delta_Phi_eq_an = -Delta_gibbs_an / (n_elec_an*ct.faraday)
+dgibbs_an = pt_s_an.delta_gibbs
+dphi_eq_an = -dgibbs_an / (n_elec_an*ct.faraday)
 
-" Let's load the parameters into a parameters dictionary "
-param = {} 
-param['SV_0'] = SV_0
-param['D_eff_naf'] = D_eff_naf
-param['sig_naf_io'] = sig_naf_io
-param['ind_elec'] = index_electron
-param['A_pv_surf_Pt'] = A_pv_surf_Pt
-param['A_pv_naf_gas_int'] = A_pv_naf_gas_int
-param['K_g'] = 16*(r_c+t_naf)**2*eps_gas**3 / (72*tau_gas**2*(1-eps_gas)**2)
-param['TPY_gas_ca_BC'] = TPY_ca_BC
-param['H_density'] = naf_bulk_ca.density_mass*naf_bulk_ca.Y[0]
-param['r_bounds'] = r_bounds
-param['dy'] = dy
-param['Ny'] = Ny
-param['Nr'] = Nr
+" Let's load the peters into a peters dictionary "
+gdl = {}
+gdl['cl_wt'] = 0.5
+gdl['gdl_wt'] = 0.5
+gdl['dy'] = t_gdl / Ny_gdl
+gdl['1/dy'] = 1 / gdl['dy']
+gdl['K_g'] = 6e-12 / 0.75 *eps_gdl  # scale permeability by values from [3]
+gdl['eps/tau2'] = eps_gdl / tau_gdl**2
 
+p = {} 
+p['gdl'] = gdl
+p['cl_wt'] = 0.5
+p['gdl_wt'] = 0.5
+p['Ny_gdl'] = Ny_gdl
+p['Ny'] = Ny
+p['Nr'] = Nr
+p['ind_e'] = ind_e
+p['TPY_gas_ca_BC'] = TPY_ca_BC
+p['SV_0'] = SV_0
+p['SA_pv_pt'] = SA_pv_pt
+p['SA_pv_naf'] = SA_pv_naf
+p['K_g'] = 8e-16 / 0.4 *eps_gas     # scale permeability by values from [3]
+p['eps/tau2'] = eps_gas / tau_gas**2
+p['D_eff_naf'] = D_eff_naf_int(naf_b_ca.T, t_naf)
+p['sig_naf_io'] = sig_naf_io_int(naf_b_ca.T, t_naf, RH)[0]
+p['rho_H'] = naf_b_ca.density_mass*naf_b_ca.Y[0]
+p['dy'] = t_ca / Ny
+p['r_jph'] = r_jph
+
+" For simplicity, calculate boundary condition terms between GDL and CL "
+gdl_cl = {}
+gdl_cl['dy'] = 0.5*gdl['dy'] + 0.5*p['dy']
+gdl_cl['1/dy'] = 1 / gdl_cl['dy']
+gdl_cl['cl_wt'] = 0.5*p['dy'] / gdl_cl['dy']
+gdl_cl['gdl_wt'] = 0.5*gdl['dy'] / gdl_cl['dy']
+gdl_cl['K_g'] = gdl_cl['gdl_wt']*gdl['K_g'] + gdl_cl['cl_wt']*p['K_g']
+gdl_cl['eps/tau2'] = gdl_cl['gdl_wt']*gdl['eps/tau2'] + gdl_cl['cl_wt']*p['eps/tau2']
+                     
 " For speed, calculate inverses/division terms "
-param['eps_naf_inv'] = 1 / eps_naf
-param['eps_gas_inv'] = 1 / eps_gas
-param['Ny_inv'] = 1 / Ny
-param['t_ca_inv'] = 1 / t_ca
-param['1/dy'] = 1 / dy
-param['(C*A)_inv'] = 1 / (C_dl*A_pv_ca_naf_int)
-param['phi/tau_sq'] = eps_gas / tau_gas**2
-param['1/delta_rs'] = 1 / delta_rs
-param['1/t_shells'] = 1 / t_shells
-param['1/r_nodes'] = 1 / r_nodes
+p['gdl_cl'] = gdl_cl
+p['1/Ny'] = 1 / Ny
+p['1/dr'] = 1 / dr
+p['1/r_j'] = 1 / r_j 
+p['1/dy'] = Ny / t_ca
+p['1/t_ca'] = 1 / t_ca
+p['1/t_shl'] = 1 / t_shl
+p['1/eps_naf'] = 1 / eps_naf
+p['1/eps_gas'] = 1 / eps_gas
+p['1/eps_gdl'] = 1 / eps_gdl
+p['1/(C*A)'] = 1 / (C_dl*SA_pv_carb)                
 
-""" Run Solver to Obtain Solution """
-"-----------------------------------------------------------------------------"
-if post_only != 1:
+" Save paters in dictionary to file for post processing "
+if save == 1:    
 
-    from dsvdt_particle_shell import dsvdt_func
+    f = open(cwd + '/' + folder_name + '/params.csv', 'w')
+    w = csv.writer(f, lineterminator='\n')
     
-    # Create vectors to store outputs:
-    i_ext = np.hstack([i_ext0, i_ext1, i_ext2])
-    eta_SS = np.zeros_like(i_ext)
-    Delta_Phi_SS = np.zeros_like(i_ext)
-    SV_save = np.zeros([len(SV_0)+1, len(i_ext)+1])
-
-    param['i_ext'] = i_OCV*(100**2) # conversion: A/cm^2 -> A/m^2
-
-    sol = solve_ivp(lambda t,SV: dsvdt_func(t, SV, obj, param, ptrs),
-          [0, t_sim], SV_0, method=method, atol=atol, rtol=rtol,
-          max_step=max_step)
+    for k,v in p.items():
+        w.writerow([k,v])
+        
+    f.close()
     
-    SV_save[:,0] = np.append(i_OCV, sol.y[:,-1])
-    Phi_0 = sol.y[int(SVptr['phi_dl']+(Ny-1)*len(SV_0)/Ny), -1]
-
-    if i_OCV == 0:
-        for i in range(len(i_ext)):
-            param['i_ext'] = i_ext[i]*(100**2) # conversion: A/cm^2 -> A/m^2
-
-            sol = solve_ivp(lambda t,SV: dsvdt_func(t, SV, obj, param, ptrs),
-                  [0, t_sim], SV_0, method=method, atol=atol, rtol=rtol,
-                  max_step=max_step)
-            
-            SV_save[:,i+1] = np.append(i_ext[i], sol.y[:,-1])
-            SV_0 = sol.y[:,-1]
-
-            eta_SS[i] = Phi_0\
-                      - sol.y[int(SVptr['phi_dl']+(Ny-1)*len(SV_0)/Ny), -1]
-
-            Delta_Phi_SS[i] = \
-                        sol.y[int(SVptr['phi_dl']+(Ny-1)*len(SV_0)/Ny),-1]\
-                        - Delta_Phi_eq_an
-
-            print('i_ext:', round(param['i_ext']*1e-4,2),
-                  'eta:', round(eta_SS[i],5),
-                  'Delta_Phi:', round(Delta_Phi_SS[i],5))
-
-""" Post-processing for Plotting and Other Results """
-"-----------------------------------------------------------------------------"
-# Move into new folder to save all outputs:
-if save != 0:
-    os.chdir(folder_name)
-    np.savetxt('solution.csv', SV_save, delimiter=',')
-
-# Generalize figure numbering:
-fig_num = 1
-
-if debug == 1:
-    # Extract cathode double layer voltage and plot:
-    phi_dl = sol.y[SVptr['phi_dl'],:]
-
-    plt.figure(fig_num)
-    plt.plot(sol.t,phi_dl)
-
-    plt.ylabel(r'Cathode Double Layer Voltage, $\phi_{dl}$ [V]')
-    plt.xlabel('Time, t [s]')
-    
-    if save != 0:
-        plt.savefig('Double_Layer_v_Time.png')
-        
-    fig_num = fig_num +1
-
-    # Extract nafion species densities and plot:
-    legend_str = []
-    legend_count = 0
-
-    for i in range(Ny):
-        species_k_Naf = sol.y[SVptr['rho_naf_k']+i*int(len(SV_0)/Ny),:]
-
-        for j in range(Nr):
-            plt.figure(fig_num)
-            plt.plot(sol.t,species_k_Naf[j])
-
-            legend_str.append(naf_bulk_ca.species_names[1] + str(legend_count))
-            legend_count = legend_count +1
-
-        plt.title('y-node = ' + str(i))
-        plt.legend(legend_str)
-        plt.ylabel(r'Nafion Phase Mass Densities, $\rho$ [kg/m$^3$]')
-        plt.xlabel('Time, t [s]')
-        
-        if save != 0:
-            plt.savefig('Nafion_Densities_y' + str(i) + '_v_Time.png')
-            
-        fig_num = fig_num +1
-
-    # Extract gas species densities and plot:
-    for i in range(gas_ca.n_species):
-        species_k_gas = sol.y[SVptr['rho_gas_k'][i]::int(len(SV_0/Ny))][0]
-
-        plt.figure(fig_num)
-        plt.plot(sol.t,species_k_gas)
-
-    plt.legend(gas_ca.species_names)
-    plt.ylabel(r'Gas Phase Mass Densities, $\rho$ [kg/m$^3$]')
-    plt.xlabel('Time, t [s]')
-    
-    if save != 0:
-        plt.savefig('Gas_Densities_v_Time.png')
-    
-    fig_num = fig_num +1
-
-if radial == 1:
-    # Extract O2 density from each Nafion shell as f(r):
-    legend_str = []
-    legend_count = 0
-
-    for i in range(Ny):
-        ind_1 = int(SVptr['rho_n1']+i*len(SV_0)/Ny)
-        ind_2 = int(SVptr['rho_n1']+i*len(SV_0)/Ny + Nr)
-        naf_k_r = sol.y[ind_1:ind_2, -1]
-
-        plt.figure(fig_num)
-        plt.plot(r_nodes*1e9, naf_k_r*1e4)
-        legend_str.append('y node = ' + str(legend_count))
-        legend_count = legend_count +1
-
-    plt.xlabel('Nafion Shell Radius, [nm]')
-    plt.ylabel('Nafion Phase - O2 Density *1e4 [$kg/m^3$]')
-    plt.legend(legend_str, loc='lower right')
-
-    if save != 0:
-        plt.savefig('Nafion_O2_v_Radius.png')
-        
-    fig_num = fig_num +1
-
-if grads == 1:
-    # Make sure potential gradient is in correct direction:
-    plt.figure(fig_num)
-    Phi_elyte_y = -1*sol.y[SVptr['phi_dl']::int(len(SV_0)/Ny),-1]
-    plt.plot(np.linspace(0,t_ca*1e6,Ny), Phi_elyte_y, '-o')
-
-    plt.xlabel(r'Cathode Depth [$\mu$m]')
-    plt.ylabel('Electrolyte Potential [V]')
-
-    if save != 0:
-        plt.savefig('Nafion_Potential_v_Depth.png')
-        
-    fig_num = fig_num +1
-
-    # Make sure O2 gradient is in correct direction - gas phase:
-    plt.figure(fig_num)
-    O2_ind = gas_ca.species_index('O2')
-    rho_O2_y = sol.y[SVptr['rho_gas_k'][O2_ind]::int(len(SV_0)/Ny),-1]
-    plt.plot(np.linspace(0,t_ca*1e6,Ny), rho_O2_y, '-o')
-
-    plt.xlabel(r'Cathode Depth [$\mu$m]')
-    plt.ylabel('Gas Phase - O2 Density [$kg/m^3$]')
-
-    if save != 0:
-        plt.savefig('Gas_O2_v_Depth.png')
-        
-    fig_num = fig_num +1
-
-    # Make sure O2 gradient is in correct direction - naf phase (inner shell):
-    plt.figure(fig_num)
-    rho_O2_y = sol.y[int(SVptr['rho_n1'])::int(len(SV_0)/Ny),-1]
-    plt.plot(np.linspace(0,t_ca*1e6,Ny), rho_O2_y*1e4, '-o')
-
-    plt.xlabel(r'Cathode Depth [$\mu$m]')
-    plt.ylabel('Nafion Phase (inner shell) - O2 Density *1e4 [$kg/m^3$]')
-
-    if save != 0:
-        plt.savefig('Nafion_O2_v_Depth.png')
-        
-    fig_num = fig_num +1
-
-if over_p == 1:
-    # Plot a overpotential curve (i_ext vs eta_SS) for the cathode:
-    plt.figure(fig_num)
-    plt.plot(i_ext, eta_SS)
-
-    plt.ylabel(r'Steady-state Overpotential, $\eta_{ss}$ [V]')
-    plt.xlabel(r'External Current, $i_{ext}$ [$A/cm^2$]')
-
-    if save != 0:
-        plt.savefig('Overpotential_Curve.png')
-    
-    fig_num = fig_num +1
-
-if polar == 1:
-    # Plot a polarization curve (i_ext vs Delta_Phi_SS) for the cell:
-    plt.figure(fig_num)
-    plt.plot(i_ext, Delta_Phi_SS)
-
-    plt.ylabel(r'Steady-state Potential, $\Delta \Phi$ [V]')
-    plt.xlabel(r'External Current, $i_{ext}$ [$A/cm^2$]')
-
-    if save != 0:
-        plt.savefig('Polarization_Curve.png')
-        
-    fig_num = fig_num +1
-    
-# Move back to original cwd after files are saved:
-os.chdir(cwd)
-
-plt.show()
+if all([save == 1, post_only == 1]):
+    np.savetxt(cwd +'/' +folder_name +'/solution.csv', sv_save, delimiter=',')
