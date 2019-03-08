@@ -55,7 +55,7 @@ def fickian_adf(TDY1, TDY2, gas, p, tog):
     # net mass flux of each species:
     mass_flux = tog*(J_conv + J_diff)
     
-    # Output returns mass flux vector [kg/m^3]    
+    # Output returns mass flux vector [kg/m^2-s]    
     return mass_flux
 
 
@@ -86,7 +86,7 @@ def radial_fdiff(rho_k1, rho_k2, p, node):
     mass_flux = p['D_eff_naf'] *(p['1/r_j'][node])**2 *(((p['r_jph'][node])**2\
               * (rho_k2 - rho_k1) *p['1/dr'][node]) *p['1/t_shl'][node])
     
-    # Output returns mass flux vector [kg/m^3]
+    # Output returns mass flux vector [kg/m^2-s]
     return mass_flux
 "-----------------------------------------------------------------------------"
 
