@@ -16,7 +16,12 @@ cwd = os.getcwd()
 
 if save == 1:
     import pemfc_runner as user_inputs
-    os.chdir(cwd + '/Saved_Results')
+    try:
+        os.chdir(cwd + '/Saved_Results')
+    except:
+        os.mkdir(cwd + '/Saved_Results')  
+        os.chdir(cwd + '/Saved_Results')
+        
     SaveFiles(folder_name, ctifile, p, sv_save, user_inputs)
     os.chdir(cwd + '/Saved_Results/' + folder_name)
     

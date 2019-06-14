@@ -131,7 +131,7 @@ def SaveFiles(folder_name, ctifile, p, sv_save, user_inputs):
     
     # Save the current cti files into new folder:
     cti_path = ct.__path__[0]
-    if os.path.existis(cwd + '/../' + ctifile):
+    if os.path.exists(cwd + '/../' + ctifile):
         copy2(cwd + '/../' + ctifile, folder_name)
     elif os.path.exists(cwd + '/../Core_Shell/' + ctifile):
         copy2(cwd + '/../Core_Shell/' + ctifile, folder_name)
