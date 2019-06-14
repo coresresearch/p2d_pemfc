@@ -1,0 +1,50 @@
+C_dl,1.5e-09
+D_O2_method,lam
+Nr,5
+Ny,5
+Ny_gdl,3
+P_an,151987.5
+P_ca,151987.5
+P_ca_BC,151987.5
+RH,95
+R_naf,0.12
+T_an,333
+T_ca,333
+T_ca_BC,333
+Y_ca_BC,"N2: 0.79, O2: 0.21, Ar: 0.01, H2O: 0.03, OH: 0"
+area_calcs,1
+atol,1e-09
+ctifile,pemfc.cti
+debug,0
+eps_gas,0.1
+eps_gdl,0.5
+folder_name,validate_low_Pt
+grads,0
+i_OCV,0
+i_ext0,[0.001 0.012 0.023 0.034 0.045 0.056 0.067 0.078 0.089 0.1  ]
+i_ext1,[0.101 0.112 0.123 0.134 0.145 0.156 0.167 0.178 0.189 0.2  ]
+i_ext2,"[0.21       0.31105263 0.41210526 0.51315789 0.61421053 0.71526316
+ 0.81631579 0.91736842 1.01842105 1.11947368 1.22052632 1.32157895
+ 1.42263158 1.52368421 1.62473684 1.72578947 1.82684211 1.92789474
+ 2.02894737 2.13      ]"
+ind_e,0
+max_t,100.0
+method,BDF
+n_elec_an,2
+over_p,0
+p_Pt,10
+phi_ca_init,0.3
+polar,1
+post_only,1
+r_Pt,1e-09
+r_c,4.5e-08
+radial,0
+rho_Pt,21450.0
+rtol,1e-06
+save,1
+sig_method,lam
+t_cl,1.5e-05
+t_gdl,0.00025
+t_naf,5e-09
+t_sim,100.0
+w_Pt,0.025
