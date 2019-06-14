@@ -66,17 +66,14 @@ shell of Nafion."""
 
 """ Import needed modules """
 "-----------------------------------------------------------------------------"
-import os, sys
 import numpy as np
 import cantera as ct
-ct.add_directory(os.getcwd() + '/Core_Shell')
-ct.add_directory(os.getcwd() + '/Flooded_Agg')
 
 """ User Input Parameters """
 "-----------------------------------------------------------------------------"
-model = 'flooded_agg'               # CL geom: 'core_shell' or 'flooded_agg'
-ctifile = 'pemfc_fa.cti'            # cantera input file to match chosen model
-ver = 2                             # debugging radial diffusion (1:cs, 1-2:fa)
+model = 'core_shell'                # CL geom: 'core_shell' or 'flooded_agg'
+ctifile = 'pemfc_cs.cti'            # cantera input file to match chosen model
+ver = 1                             # debugging radial diffusion (1:cs, 1-2:fa)
 
 " Initial electrochemical values "
 i_OCV = 0                           # 0 [A/cm^2] -> or single run if != 0 
@@ -90,16 +87,16 @@ T_an, P_an = 333, 1.5*ct.one_atm    # anode temp [K] and pressure [Pa] at t = 0
 " Transport and material properties "
 RH = 95              # relative humidity of Nafion phase [%]
 C_dl = 1.5e-9        # capacitance of double layer [F/m^2]
-sig_method = 'sun'   # 'lam', 'bulk', 'mix', or 'sun' for conductivity method
-D_O2_method = 'sun'  # 'lam', 'bulk', 'mix', or 'sun' for D_O2 method
-R_naf = 60e-3        # resistance of Nafion membrane [Ohm*cm^2] (45:cs, 60:fa)
+sig_method = 'mix'   # 'lam', 'bulk', 'mix', or 'sun' for conductivity method
+D_O2_method = 'mix'  # 'lam', 'bulk', 'mix', or 'sun' for D_O2 method
+R_naf = 45e-3        # resistance of Nafion membrane [Ohm*cm^2] (45:cs, 60:fa)
 
 " Pt loading and geometric values "
 area_calcs = 1      # control for area calculations [0:p_Pt, 1:Pt_loading]
 p_Pt = 10           # percentage of Pt covering the carbon particle surface [%]
 w_Pt = 0.2          # loading of Pt on carbon [mg/cm^2]
 rho_Pt = 21.45e3    # density of Pt for use in area property calcs [kg/m^3]
-r_c = 25e-9         # radius of single carbon particle [m] (50:cs, 25:fa)
+r_c = 50e-9         # radius of single carbon particle [m] (50:cs, 25:fa)
 r_Pt = 1e-9         # radius of Pt 1/2 sphere sitting on C surface [m]
 t_gdl = 250e-6      # thickness of cathode GDL modeled in simulation [m]
 t_cl = 15e-6        # thickness of cathode CL modeled in simulation [m]
@@ -136,11 +133,11 @@ rtol = 1e-6         # relative tolerance passed to solver
 
 " Plot toggles - (0: off and 1: on) "
 post_only = 0       # turn on to only run post-processing
-debug = 1           # turn on to plot first node variables vs time
-radial = 1          # turn on radial O2 plots for each Nafion shell
-grads = 1           # turn on to plot O2 and Phi gradients in depth of cathode
+debug = 0           # turn on to plot first node variables vs time
+radial = 0          # turn on radial O2 plots for each Nafion shell
+grads = 0           # turn on to plot O2 and Phi gradients in depth of cathode
 polar = 1           # turn on to generate full cell polarization curves
-over_p = 1          # turn on to plot overpotential curve for cathode side
+over_p = 0          # turn on to plot overpotential curve for cathode side
 
 " Verification settings "
 i_ver = 1           # verify current between GDL and CL with O2 flux calcs
@@ -151,8 +148,8 @@ font_nm = 'Arial'   # name of font for plots
 font_sz = 14        # size of font for plots
 
 " Saving options "
-folder_name = 'cs_test_06122019'     # folder name for saving all files/outputs
-save = 1                        # toggle saving on/off with '1' or '0'
+folder_name = 'folder_name'     # folder name for saving all files/outputs
+save = 0                        # toggle saving on/off with '1' or '0'
 
 """ End of user inputs - do not edit anything below this line """
 "-----------------------------------------------------------------------------"
