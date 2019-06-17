@@ -1,4 +1,3 @@
-#check the branch
 """ Model Description """
 "-----------------------------------------------------------------------------"
 """This model is a half cell model of of PEM fuel cell cathode. The runner file
