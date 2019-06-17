@@ -360,7 +360,7 @@ print('t_f:',sol.t[-1],'i_ext:',round(cl['i_ext']*1e-4,3), 'dPhi:',round(dphi_ss
 
 for i in range(len(i_ext) -1):
     # Don't run the for loop if i_OCV was not set to 0...
-    if all([i == 0, i_OCV != 0]): 
+    if any([all([i == 0, i_OCV != 0]), polar == 'off']): 
         break
     
     # Update and convert i_ext: A/cm^2 -> A/m^2

@@ -132,15 +132,15 @@ atol = 1e-9         # absolute tolerance passed to solver
 rtol = 1e-6         # relative tolerance passed to solver
 
 " Plot toggles - (0: off and 1: on) "
-post_only = 1       # turn on to only run post-processing
+post_only = 0       # turn on to only run post-processing
 debug = 0           # turn on to plot first node variables vs time
 radial = 0          # turn on radial O2 plots for each Nafion shell
 grads = 0           # turn on to plot O2 and Phi gradients in depth of cathode
-polar = 0           # turn on to generate full cell polarization curves
+polar = 1           # turn on to generate full cell polarization curves
 over_p = 0          # turn on to plot overpotential curve for cathode side
 
 " Verification settings "
-i_ver = 1           # verify current between GDL and CL with O2 flux calcs
+i_ver = 0           # verify current between GDL and CL with O2 flux calcs
 i_find = 0.5        # current from polarization curve to use in i_ver processing
 
 " Plotting options "
@@ -149,7 +149,7 @@ font_sz = 14        # size of font for plots
 
 " Saving options "
 folder_name = 'folder_name'     # folder name for saving all files/outputs
-save = 1                        # toggle saving on/off with '1' or '0'
+save = 0                        # toggle saving on/off with '1' or '0'
 
 """ End of user inputs - do not edit anything below this line """
 "-----------------------------------------------------------------------------"
@@ -159,10 +159,9 @@ save = 1                        # toggle saving on/off with '1' or '0'
 
 """ Process inputs from this file and run model """
 "-----------------------------------------------------------------------------"
-if __name__ == '__main__':
-    exec(open("Shared_Funcs/pemfc_pre.py").read())
-    
+if __name__ == '__main__':    
     if post_only == 0:
+        exec(open("Shared_Funcs/pemfc_pre.py").read())
         exec(open("Shared_Funcs/pemfc_dsvdt.py").read())
     
     exec(open("Shared_Funcs/pemfc_post.py").read())

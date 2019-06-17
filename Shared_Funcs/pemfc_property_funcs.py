@@ -19,7 +19,7 @@ import numpy as np
 
 """ Nafion ionic conductivity model [S/m] """
 "-----------------------------------------------------------------------------"
-def sig_naf_io_func(temp, t_naf, RH, p_Pt, p, method, flag):
+def sig_naf_io_func(temp, t_naf, RH, p_Pt, p, method, model):
     # The method input gives control over how the Nafion conductivity is 
     # calculated. Options are 'lam' for laminar in which an interpolation is
     # done using data from [1], 'bulk' for treating the thin Nafion shells the 
@@ -30,7 +30,8 @@ def sig_naf_io_func(temp, t_naf, RH, p_Pt, p, method, flag):
     # agglomerate model options which takes constant values used in [2].
     
     # Inputs: Temperature [K], Nafion shell thickness [m], rel. humiditiy [%],
-    #         Pt coverage [%], Calculation method [-], p['eps/tau2_n'] [-]
+    #         Pt coverage [%], p['eps/tau2_n'] [-] and p['p_eff_SAnaf'] [-], 
+    #         calculation method [-], and model type [-]
     
     """ Lamellae Method """
     # Data below is taken from "Proton Transport in Supported Nafion Nanothin
@@ -128,10 +129,10 @@ def sig_naf_io_func(temp, t_naf, RH, p_Pt, p, method, flag):
     # Using a parallel resistor network to weight the conductivity through 
     # lamellae and that through bulk-like material is performed with respect to
     # the amount of Pt and C areas respectively.
-    if flag == 'core_shell':
+    if model == 'core_shell':
     	sig_naf_io_mix = 1 / (p['p_eff_SAnaf'] / sig_naf_io_lam 
     				   		  + (1 -p['p_eff_SAnaf']) / sig_naf_io_bulk)
-    elif flag == 'flooded_agg':
+    elif model == 'flooded_agg':
     	sig_naf_io_mix = 1 / (p_Pt/100 / sig_naf_io_lam 
     				   		  + (1 -p_Pt/100) / sig_naf_io_bulk)
     
@@ -152,7 +153,7 @@ def sig_naf_io_func(temp, t_naf, RH, p_Pt, p, method, flag):
 
 """ Effective O2 diffusion coeff. in Nafion model [m^2/s] """
 "-----------------------------------------------------------------------------"
-def D_eff_naf_func(temp, t_naf, p_Pt, p, method, flag):
+def D_eff_naf_func(temp, t_naf, p_Pt, p, method, model):
     # The method input gives control over how the Nafion conductivity is 
     # calculated. Options are 'lam' for laminar in which artificial lamellae
     # are generated from the shell thickness and used to created a series 
@@ -164,7 +165,8 @@ def D_eff_naf_func(temp, t_naf, p_Pt, p, method, flag):
     # in [2].
     
     # Inputs: Temperature [K], Carbon radius [m], Nafion shell thickness [m],
-    #         Pt coverage [%], Calculation method [-]
+    #         Pt coverage [%], p['p_eff_SAnaf'] [-], calculation method [-],
+    #         and model type [-]
     
     """ Lamellae Method """ 
     # This method assumes that lamellae exist in the thin Nafion shells found
@@ -250,12 +252,11 @@ def D_eff_naf_func(temp, t_naf, p_Pt, p, method, flag):
     # Using a parallel resistor network to weight the diffusion coeff. through 
     # lamellae and that through bulk-like material is performed with respect to
     # the amount of Pt and C areas respectively.
-    if flag == 'core_shell':
-    	D_eff_naf_mix = 1 / (p['p_eff_SAnaf'] / D_eff_naf_lam 
-    						 + (1 -p['p_eff_SAnaf']) / D_eff_naf_bulk)
-    elif flag == 'flooded_agg':
-    	D_eff_naf_mix = 1 / (p_Pt/100 / D_eff_naf_lam 
-    						 + (1 -p_Pt/100) / D_eff_naf_bulk)
+#    if model == 'core_shell':
+#    	D_eff_naf_mix = 1 / (p['p_eff_SAnaf'] / D_eff_naf_lam + (1 -p['p_eff_SAnaf']) 
+#                     / D_eff_naf_bulk)
+#    elif model == 'flooded_agg':
+    D_eff_naf_mix = 1 / (p_Pt/100 / D_eff_naf_lam + (1 -p_Pt/100) / D_eff_naf_bulk)
     
     " Set diffusion coefficient depending on method "
     if method == 'lam':
@@ -287,7 +288,7 @@ Offload geometric calculations for reaction areas to clean up the code:
 def rxn_areas_cs(w_Pt, t_cl, eps_gas, t_naf, r_c, r_Pt, rho_Pt, theta):
     # Units for inputs are:
     # w_Pt [mg/cm^2], t_cl [m], eps_gas [-], t_naf [m], r_c [m], r_Pt [m], 
-    # and rho_Pt [kg/m^3]
+    # rho_Pt [kg/m^3], and theta [degrees]
     
     "Find the mass of Pt per agglomerate"
     w_Pt = w_Pt *0.01 # convert [mg/cm^2] --> [kg/m^2]
