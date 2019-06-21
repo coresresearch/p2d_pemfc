@@ -192,6 +192,62 @@ if grads == 1:
         plt.savefig('Nafion_O2_v_CL_Depth.png')
         
     fig_num = fig_num +1
+    
+    # Check i_far as a f(y) in CL at steady-state conditions:
+    i_ind = np.argmin(abs(i_ext - i_find))
+    sv = sv_save[1:, i_ind]
+
+    y_cl = np.linspace(0, t_cl, cl['Ny']) *1e6
+    cl_ymv = 0
+    
+    if model == 'core_shell':
+        i_far_cl = np.zeros(cl['Ny'])
+        
+        for i in range(cl['Ny']):
+            carb_ca.electric_potential = 0
+            pt_s_ca.electric_potential = 0
+            
+            naf_b_ca.electric_potential = -sv[iSV['phi_dl'] +cl_ymv]
+            naf_s_ca.electric_potential = -sv[iSV['phi_dl'] +cl_ymv]
+            
+            rho_naf_k = sv[iSV['rho_naf_k'] +cl_ymv]
+            naf_b_ca.TDY = sv[iSV['T_cl'] +cl_ymv], sum(rho_naf_k), rho_naf_k
+            
+            i_far_cl[i] = pt_s_ca.get_net_production_rates(carb_ca)\
+                        *ct.faraday *cl['SApv_pt']
+            
+            cl_ymv = cl_ymv +cl['nxt_y']
+                
+    elif model == 'flooded_agg':
+        i_far_r = np.zeros([cl['Ny'], cl['Nr']])
+        
+        for i in range(cl['Ny']):
+            carb_ca.electric_potential = 0
+            pt_s_ca.electric_potential = 0
+            
+            naf_b_ca.electric_potential = -sv[iSV['phi_dl'] +cl_ymv]
+            naf_s_ca.electric_potential = -sv[iSV['phi_dl'] +cl_ymv]
+            
+            for j in range(cl['Nr']):
+                rho_naf_k = sv[iSV['rho_naf_k'] +cl_ymv +j*cl['nxt_r']]
+                naf_b_ca.TDY = sv[iSV['T_cl'] +cl_ymv], sum(rho_naf_k), rho_naf_k
+                
+                i_far_r[i,j] = pt_s_ca.get_net_production_rates(carb_ca)\
+                              *ct.faraday *cl['SApv_pt'] *cl['Vf_ishl'][j]             
+                
+        i_far_cl = np.sum(i_far_r, axis=1)
+    
+    plt.figure(fig_num)
+    plt.plot(y_cl, -i_far_cl / (i_ext[i_ind] *cl['1/dy'] *100**2), '-o')
+    
+    plt.xlabel(r'Cathode Depth [$/mu$m]')
+    plt.ylabel(r'i$_{Far}$ / i$_{ext}$ [-]')
+    plt.tight_layout()
+        
+    if save == 1:
+        plt.savefit('i_far_v_CL_Depth.png')
+        
+    fig_num = fig_num +1
 
 if over_p == 1:
     # Plot a overpotential curve (i_ext vs eta_ss) for the cathode:
@@ -217,32 +273,32 @@ if polar == 1:
     plt.tight_layout()
     
     if w_Pt == 0.2:
-        x = np.array([0.008, 0.051, 0.201, 0.403, 0.802, 1.002, 1.202, 1.501, 
-                      1.651, 1.851, 2.000])
+        x = np.array([0.000, 0.050, 0.200, 0.400, 0.800, 1.000, 1.200, 1.500, 
+                      1.650, 1.850, 2.000])
         y = np.array([0.952, 0.849, 0.803, 0.772, 0.731, 0.716, 0.700, 0.675, 
                       0.665, 0.647, 0.634])
         yerr = np.array([0, 0.012, 0.007, 0.007, 0.012, 0.001, 0.008, 0.007,
                          0.007, 0.009, 0.009])
         color = 'C0'
     elif w_Pt == 0.1:
-        x = np.array([0.006, 0.053, 0.201, 0.401, 0.802, 1.002, 1.200, 1.499, 
-                      1.651, 1.851, 2.000])
+        x = np.array([0.000, 0.050, 0.200, 0.400, 0.800, 1.000, 1.200, 1.500, 
+                      1.650, 1.850, 2.000])
         y = np.array([0.930, 0.834, 0.785, 0.754, 0.711, 0.691, 0.673, 0.649, 
                       0.635, 0.615, 0.598])
         yerr = np.array([0, 0.009, 0.007, 0.005, 0.007, 0.011, 0.011, 0.007, 
                          0.009, 0.011, 0.011])
         color = 'C1'
     elif w_Pt == 0.05:
-        x = np.array([0.008, 0.053, 0.201, 0.401, 0.800, 1.000, 1.200, 1.500, 
-                      1.651, 1.850, 2.001])
+        x = np.array([0.000, 0.050, 0.200, 0.400, 0.800, 1.000, 1.200, 1.500, 
+                      1.650, 1.850, 2.000])
         y = np.array([0.919, 0.810, 0.760, 0.724, 0.674, 0.653, 0.634, 0.603,
                       0.585, 0.558, 0.537])
         yerr = np.array([0, 0.008, 0.006, 0.006, 0.007, 0.007, 0.005, 0.005, 
                          0.006, 0.007, 0.007])
         color = 'C2'
     elif w_Pt == 0.025:
-        x = np.array([0.003, 0.049, 0.202, 0.404, 0.803, 1.005, 1.204, 1.503, 
-                      1.653, 1.851, 2.004])
+        x = np.array([0.000, 0.050, 0.200, 0.400, 0.800, 1.000, 1.200, 1.500, 
+                      1.650, 1.850, 2.000])
         y = np.array([0.910, 0.785, 0.724, 0.683, 0.626, 0.598, 0.572, 0.527, 
                       0.502, 0.463, 0.430])
         yerr = np.array([0, 0.004, 0.010, 0.014, 0.013, 0.013, 0.019, 0.024, 
@@ -251,7 +307,7 @@ if polar == 1:
         
     try:
         plt.errorbar(x, y, yerr=yerr, fmt='o', color=color, capsize=3, label='Owejan et. al.')
-        plt.ylim([0.35, 1.0]); plt.xlim([0, 2.1]); plt.legend(loc='best')
+        plt.ylim([0.35, 1.0]); plt.xlim([0, 2.1]) #; plt.legend(loc='best')
     except:
         None
 
