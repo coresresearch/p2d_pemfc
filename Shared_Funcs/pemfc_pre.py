@@ -48,6 +48,31 @@ gas_ca.basis = basis
 pt_s_ca.basis = basis
 naf_s_ca.basis = basis
 
+###############################################################################
+# Change parameters for optimization only:
+if optimize == 1:
+    if tog == 2:
+        R_naf = c*w_Pt**d
+    else:
+        R_naf = R_naf_opt
+        
+    theta = theta_opt
+        
+    Rxn1 = pt_s_ca.reaction(0)
+    if tog == 1:
+        i_o = abs(a*w_Pt + b)
+    else:
+        i_o = i_o_opt
+    Rxn1.rate = ct.Arrhenius(i_o, 0, 0)
+    pt_s_ca.modify_reaction(0, Rxn1)
+    
+    O2 = naf_b_ca.species(naf_b_ca.species_index('O2(Naf)'))
+    fuel_coeffs = O2.thermo.coeffs
+    fuel_coeffs[[1,8]] = np.array([3.28253784 +offset_opt, 3.782456360 +offset_opt])
+    O2.thermo = ct.NasaPoly2(200, 3500, ct.one_atm, fuel_coeffs)
+    naf_b_ca.modify_species(naf_b_ca.species_index('O2(Naf)'), O2)
+###############################################################################
+
 " Store phases in a common 'objs' dict: "
 objs = {}
 objs['carb_ca'] = carb_ca
