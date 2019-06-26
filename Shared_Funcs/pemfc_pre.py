@@ -52,7 +52,7 @@ naf_s_ca.basis = basis
 # Change parameters for optimization only:
 if optimize == 1:
     if tog == 2:
-        R_naf = c*w_Pt**d
+        R_naf = (c*w_Pt**d + 35) *1e-3
     else:
         R_naf = R_naf_opt
         
@@ -60,7 +60,7 @@ if optimize == 1:
         
     Rxn1 = pt_s_ca.reaction(0)
     if tog == 1:
-        i_o = abs(a*w_Pt + b)
+        i_o = a*w_Pt + b
     else:
         i_o = i_o_opt
     Rxn1.rate = ct.Arrhenius(i_o, 0, 0)
