@@ -72,7 +72,7 @@ import cantera as ct
 
 """ User Input Parameters """
 "-----------------------------------------------------------------------------"
-model = 'core_shell'                # CL geom: 'core_shell' or 'flooded_agg'
+model = 'flooded_agg'               # CL geom: 'core_shell' or 'flooded_agg'
 ctifile = 'pemfc_cs.cti'            # cantera input file to match chosen model
 ver = 1                             # debugging radial diffusion (1:cs, 1-2:fa)
 
@@ -124,8 +124,8 @@ ind_e = 0           # index of electrons in Pt surface phase... from cti
 method = 'BDF'      # method for solve_ivp [eg: BDF,RK45,LSODA,Radau,etc...]
 t_sim = 1e2         # time span of integration [s]
 Ny_gdl = 3          # number of depth discretizations for GDL
-Ny_cl = 5           # number of depth discretizations for CL
-Nr_cl = 5           # number of radial discretizations for CL nafion shells
+Ny_cl = 3           # number of depth discretizations for CL
+Nr_cl = 3           # number of radial discretizations for CL nafion shells
 
 " Modify tolerance for convergence "
 max_t = t_sim       # maximum allowable time step for solver [s]
@@ -141,7 +141,7 @@ polar = 1           # turn on to generate full cell polarization curves
 over_p = 0          # turn on to plot overpotential curve for cathode side
 
 " Verification settings "
-i_ver = 0           # verify current between GDL and CL with O2 flux calcs
+i_ver = 1           # verify current between GDL and CL with O2 flux calcs
 i_find = 0.5        # current from polarization curve to use in i_ver processing
 
 " Plotting options "
@@ -157,6 +157,13 @@ save = 0                        # toggle saving on/off with '1' or '0'
 ###############################################################################
 ###############################################################################
 ###############################################################################
+
+if model == 'core_shell': 
+    ctifile, ver, R_naf, r_c = 'pemfc_cs.cti', 1, 0e-3, 50e-9
+    sig_method, D_O2_method = 'mix', 'mix'
+elif model == 'flooded_agg': 
+    ctifile, ver, R_naf, r_c = 'pemfc_fa.cti', 2, 60e-3, 25e-9
+    sig_method, D_O2_method = 'sun', 'sun'
 
 """ Process inputs from this file and run model """
 "-----------------------------------------------------------------------------"

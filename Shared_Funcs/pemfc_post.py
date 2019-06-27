@@ -8,6 +8,7 @@ from Shared_Funcs.read_write_save_funcs import *
 """ Post-processing for Plotting and Other Results """
 "-----------------------------------------------------------------------------"
 # Update plot settings:
+plt.close('all')
 font = plt.matplotlib.font_manager.FontProperties(family=font_nm, size=font_sz)
 plt.rcParams.update({'font.size': font_sz})
 
@@ -58,9 +59,9 @@ if debug == 1:
         legend_str = []
         legend_count = 0
     
-        ind1 = iSV[start_tog][iO2_n]
+        ind1 = iSV[start_tog][iO2_n] +i*cl['nxt_y']
         ind2 = iSV[start_tog][iO2_n] +i*cl['nxt_y'] +(Nr_cl +shl_tog)*cl['nxt_r']
-        species_k_Naf = sol.y[ind1:ind2:naf_b_ca.n_species, :]
+        species_k_Naf = sol.y[ind1:ind2:n_r_species, :]
 
         for j in range(Nr_cl +shl_tog):
             plt.figure(fig_num)
@@ -111,6 +112,29 @@ if debug == 1:
         plt.savefig('GDL_Gas_Densities_v_Time.png')
     
     fig_num = fig_num +2
+    
+    for i in range(Ny_cl):
+        # Extract pt surface sites and plot:
+        legend = []
+        legend_count = 0
+        
+        for j in range(pt_s_ca.n_species):
+            theta_pt_k = sol.y[iSV['theta_pt_k'][j] +i*cl['nxt_y'], :]
+            
+            plt.figure(fig_num)
+            plt.plot(sol.t, theta_pt_k)
+            
+        fig_num = fig_num +1
+        plt.title('y-node = ' + str(i))
+        plt.legend(pt_s_ca.species_names)
+        plt.ylabel('Surface Coverage [-]')
+        plt.xlabel('Time, t [s]')
+        plt.tight_layout()
+    
+    if save == 1:
+        plt.savefig('Theta_pt_k_v_Time.png')
+        
+    fig_num = fig_num +1
 
 if radial == 1:
     # Extract O2 density from each Nafion shell as f(r):
@@ -212,6 +236,7 @@ if grads == 1:
             
             rho_naf_k = sv[iSV['rho_naf_k'] +cl_ymv]
             naf_b_ca.TDY = sv[iSV['T_cl'] +cl_ymv], sum(rho_naf_k), rho_naf_k
+            pt_s_ca.coverages = sv[iSV['theta_pt_k'] +cl_ymv]
             
             i_far_cl[i] = pt_s_ca.get_net_production_rates(carb_ca)\
                         *ct.faraday *cl['SApv_pt']
@@ -231,11 +256,14 @@ if grads == 1:
             for j in range(cl['Nr']):
                 rho_naf_k = sv[iSV['rho_naf_k'] +cl_ymv +j*cl['nxt_r']]
                 naf_b_ca.TDY = sv[iSV['T_cl'] +cl_ymv], sum(rho_naf_k), rho_naf_k
+                pt_s_ca.coverages = sv[iSV['theta_pt_k'] +cl_ymv +j*cl['nxt_r']]
                 
                 i_far_r[i,j] = pt_s_ca.get_net_production_rates(carb_ca)\
                               *ct.faraday *cl['SApv_pt'] *cl['Vf_ishl'][j]             
                 
-        i_far_cl = np.sum(i_far_r, axis=1)
+            i_far_cl = np.sum(i_far_r, axis=1)
+            
+            cl_ymv = cl_ymv +cl['nxt_y']
     
     plt.figure(fig_num)
     plt.plot(y_cl, -i_far_cl / (i_ext[i_ind] *cl['1/dy'] *100**2), '-o')
