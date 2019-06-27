@@ -16,7 +16,7 @@ gas_ca.TP = T_ca, P_ca
 naf_b_ca = ct.Solution(ctifile, 'naf_bulk_ca')
 naf_b_ca.TP = T_ca, P_ca
 
-pt_s_ca = ct.Interface(ctifile, 'Pt_surf_ca', [carb_ca, naf_b_ca])
+pt_s_ca = ct.Interface(ctifile, 'Pt_surf_ca', [carb_ca, naf_b_ca, gas_ca])
 pt_s_ca.TP = T_ca, P_ca
 
 naf_s_ca = ct.Interface(ctifile, 'naf_surf_ca', [naf_b_ca, gas_ca])
@@ -50,6 +50,9 @@ naf_s_ca.basis = basis
 
 ###############################################################################
 # Change parameters for optimization only:
+if 'optimize' in vars(): None
+else: optimize = 0
+    
 if optimize == 1:
     if tog == 2:
         R_naf = (c*w_Pt**d + e) *1e-3
@@ -99,8 +102,16 @@ iSV['rho_gdl_k'] = np.arange(1, 1 +gas_ca.n_species)
 iSV['T_cl'] = (iSV['rho_gdl_k'][-1] +1)*Ny_gdl
 iSV['phi_dl'] = (iSV['rho_gdl_k'][-1] +1)*Ny_gdl +1
 iSV['rho_gas_k'] = np.arange(iSV['phi_dl'] +1, iSV['phi_dl'] +1 +gas_ca.n_species)
-iSV['rho_shl_k'] = np.arange(iSV['rho_gas_k'][-1] +1, iSV['rho_gas_k'][-1] +1 +naf_b_ca.n_species)
-iSV['rho_naf_k'] = np.arange(iSV['rho_shl_k'][-1] +1, iSV['rho_shl_k'][-1] +1 +naf_b_ca.n_species)    
+
+if model == 'core_shell':
+    n_r_species = naf_b_ca.n_species
+    iSV['theta_pt_k'] = np.arange(iSV['rho_gas_k'][-1] +1, iSV['rho_gas_k'][-1] +1 +pt_s_ca.n_species)
+    iSV['rho_naf_k'] = np.arange(iSV['theta_pt_k'][-1] +1, iSV['theta_pt_k'][-1] +1 +naf_b_ca.n_species)
+elif model == 'flooded_agg':
+    n_r_species = naf_b_ca.n_species +pt_s_ca.n_species
+    iSV['rho_shl_k'] = np.arange(iSV['rho_gas_k'][-1] +1, iSV['rho_gas_k'][-1] +1 +naf_b_ca.n_species)
+    iSV['theta_pt_k'] = np.arange(iSV['rho_shl_k'][-1] +1, iSV['rho_shl_k'][-1] +1 +pt_s_ca.n_species)
+    iSV['rho_naf_k'] = np.arange(iSV['theta_pt_k'][-1] +1, iSV['theta_pt_k'][-1] +1 +naf_b_ca.n_species)    
 
 """ Pre-Processing and Initialization """
 "-----------------------------------------------------------------------------"
@@ -108,10 +119,17 @@ iSV['rho_naf_k'] = np.arange(iSV['rho_shl_k'][-1] +1, iSV['rho_shl_k'][-1] +1 +n
 # Initialize all nodes according to cti and user inputs:
 gas_ca.TPY = T_ca_BC, P_ca_BC, Y_ca_BC
 SV_0_gas_k = gas_ca.density_mass*gas_ca.Y
-SV_0_naf_k = np.tile(naf_b_ca.density_mass*naf_b_ca.Y, Nr_cl +1)    
+SV_0_naf_k = naf_b_ca.density_mass*naf_b_ca.Y
+SV_0_pt_k = pt_s_ca.coverages
 
 SV_0_gdl = np.tile(np.hstack((T_ca, SV_0_gas_k)), Ny_gdl)
-SV_0_cl = np.tile(np.hstack(([T_ca, phi_ca_init], SV_0_gas_k, SV_0_naf_k)), Ny_cl)
+
+if model == 'core_shell':
+    SV_0_rad = np.tile(SV_0_naf_k, Nr_cl) 
+    SV_0_cl = np.tile(np.hstack(([T_ca, phi_ca_init], SV_0_gas_k, SV_0_pt_k, SV_0_rad)), Ny_cl)
+elif model == 'flooded_agg':
+    SV_0_rad = np.tile(np.hstack([SV_0_pt_k, SV_0_naf_k]), Nr_cl)
+    SV_0_cl = np.tile(np.hstack(([T_ca, phi_ca_init], SV_0_gas_k, SV_0_naf_k, SV_0_rad)), Ny_cl)
 
 SV_0 = np.zeros(len(SV_0_gdl) + len(SV_0_cl))
 SV_0 = np.hstack([SV_0_gdl, SV_0_cl])
@@ -316,7 +334,7 @@ cl['y'] = t_cl
 cl['Ny'] = Ny_cl
 cl['Nr'] = Nr_cl
 cl['nxt_y'] = int(L_cl / Ny_cl)       # spacing between adjacent y nodes in CL
-cl['nxt_r'] = int(naf_b_ca.n_species) # spacing between adjacent r nodes in CL
+cl['nxt_r'] = n_r_species             # spacing between adjacent r nodes in CL
 cl['i_e'] = ind_e
 cl['iH'] = naf_b_ca.species_index('H(Naf)')
 cl['SApv_pt'] = SApv_pt
@@ -331,6 +349,7 @@ cl['1/t_shl'] = 1 / t_shl
 cl['1/dr'] = 1 / dr
 cl['Vf_shl'] = Vf_shl
 cl['1/Vf_shl'] = 1 / Vf_shl
+cl['1/gamma'] = 1 / pt_s_ca.site_density
     
 if model == 'flooded_agg':
     cl['eps/tau2_n2'] = eps_n_agg / tau_n_agg**2 # inner agglomerate only

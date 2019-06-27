@@ -71,7 +71,7 @@ import cantera as ct
 
 """ User Input Parameters """
 "-----------------------------------------------------------------------------"
-model = 'core_shell'                # CL geom: 'core_shell' or 'flooded_agg'
+model = 'flooded_agg'               # CL geom: 'core_shell' or 'flooded_agg'
 ctifile = 'pemfc_cs.cti'            # cantera input file to match chosen model
 ver = 1                             # debugging radial diffusion (1:cs, 2:fa)
 
@@ -146,9 +146,8 @@ over_p = 0          # turn on to plot overpotential curve for cathode side
 
 " Verification settings - (0: off and 1: on) unless otherwise stated "
 data = 1            # include data from Owejan et. al. on polarization if available
-i_ver = 0           # verify current between GDL and CL with O2 flux calcs
-
-i_find = 0.0001     # current from polarization curve to use in i_ver processing
+i_ver = 1           # verify current between GDL and CL with O2 flux calcs
+i_find = 0.5        # current from polarization curve to use in i_ver processing
 
 " Plotting options "
 font_nm = 'Arial'   # name of font for plots
@@ -165,7 +164,7 @@ save = 0                        # toggle saving on/off with '1' or '0'
 ###############################################################################
 
 if model == 'core_shell': 
-    ctifile, ver, R_naf, r_c = 'pemfc_cs.cti', 1, 45e-3, 50e-9
+    ctifile, ver, R_naf, r_c = 'pemfc_cs.cti', 1, 0e-3, 50e-9
     sig_method, D_O2_method = 'mix', 'mix'
 elif model == 'flooded_agg': 
     ctifile, ver, R_naf, r_c = 'pemfc_fa.cti', 2, 60e-3, 25e-9
