@@ -138,11 +138,11 @@ rtol = 1e-6         # relative tolerance passed to solver
 
 " Plot toggles - (0: off and 1: on) "
 post_only = 0       # turn on to only run post-processing
-debug = 0           # turn on to plot first node variables vs time
-radial = 0          # turn on radial O2 plots for each Nafion shell
-grads = 0           # turn on to plot O2, Phi, i_far gradients vs depth of CL
+debug = 0           # turn on to plot solution vector variables vs time
+radial = 0          # turn on radial O2 plots for each Nafion shell/agglomerate
+grads = 0           # turn on to plot O2, Phi, and i_far gradients vs CL depth
 polar = 1           # turn on to generate full cell polarization curves
-over_p = 0          # turn on to plot overpotential curve for cathode side
+over_p = 0          # turn on to plot overpotential curve for cathode
 
 " Verification settings - (0: off and 1: on) unless otherwise stated "
 data = 1            # include data from Owejan et. al. on polarization if available

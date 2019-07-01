@@ -228,8 +228,7 @@ def dsvdt_cl_fa(t, sv, dsvdt, objs, p, iSV, gdl_BC):
 
             # Pt surface coverages:
             iMid = iSV['theta_pt_k'] +cl_ymv +j*cl['nxt_r']
-            dsvdt[iMid] = pt_s_ca.get_net_production_rates(pt_s_ca) *cl['1/gamma']\
-                        *pt_rxn *cl['Vf_ishl'][j]
+            dsvdt[iMid] = pt_s_ca.get_net_production_rates(pt_s_ca) *cl['1/gamma'] *pt_rxn
                                         
 
             # Combine ORR and flux to get overall ODE for Nafion densities:
@@ -255,8 +254,7 @@ def dsvdt_cl_fa(t, sv, dsvdt, objs, p, iSV, gdl_BC):
                     
         # Pt surface coverages:
         iLast = iSV['theta_pt_k'] +cl_ymv +(cl['Nr'] -1)*cl['nxt_r']
-        dsvdt[iLast] = pt_s_ca.get_net_production_rates(pt_s_ca) *cl['1/gamma']\
-                     *pt_rxn *cl['Vf_ishl'][-1]
+        dsvdt[iLast] = pt_s_ca.get_net_production_rates(pt_s_ca) *cl['1/gamma'] *pt_rxn
 
         # Combine ORR and flux to get overall ODE:
         iLast = iSV['rho_naf_k'] +cl_ymv +(cl['Nr'] -1)*cl['nxt_r']
