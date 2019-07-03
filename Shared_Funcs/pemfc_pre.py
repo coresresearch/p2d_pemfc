@@ -52,7 +52,7 @@ naf_s_ca.basis = basis
 # Change parameters for optimization only:
 if optimize == 1:
     if tog == 2:
-        R_naf = (c*w_Pt**d + 35) *1e-3
+        R_naf = (c*w_Pt**d + e) *1e-3
     else:
         R_naf = R_naf_opt
         

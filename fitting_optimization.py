@@ -12,7 +12,7 @@ Instructions:
     To use this script, open up the pemfc_runner.py file and comment out the 
     line of code that specifies w_Pt. Copy and paste the lines of code
     below to input i_OCV, i_ext1, i_ext2, and i_ext3 into pemfc_runner.py. Once
-    these items have been complete, fill out the initial guess values for the 
+    these items have been completed, fill out the initial guess values for the 
     optimization in 'p0', 'p1', or 'p2' in the order commented below. Ranges 
     for each of these parameters should also be specified in the respective 
     'bounds*' variable below. Simply run this script after these inputs have 
@@ -28,13 +28,13 @@ Optimization options:
     and b to be varied instead of just a constant i_o. The last case is when 
     tog = 2 which again assumes the same parameters are being varied except that
     R_naf is treated as a function of Pt loading instead of i_o. The form of 
-    this function is R_naf = (c*w_Pt^d +35)*1e-3 where c and d become the fitting 
-    parameters.
+    this function is R_naf = (c*w_Pt^d +e)*1e-3 where c, d, and e become the 
+    fitting parameters.
     
 Units for inputs:
-    R_naf [Ohm*cm^2], theta [degrees], i_o [A/cm^2 *(cm^3/kmol)^6.5], offset [-], 
+    R_naf [mOhm*cm^2], theta [degrees], i_o [A/cm^2 *(cm^3/kmol)^6.5], offset [-], 
     a [A/cm^2 *(cm^3/kmol)^6.5 /(mg/cm^2)], b [A/cm^2 *(cm^3/kmol)^6.5], 
-    c [mOhm*cm^2 /(mg/cm^2)], and d [-].
+    c [mOhm*cm^2 /(mg/cm^2)], and d [-], e [mOhm*cm^2].
 """
 
 import numpy as np
@@ -52,17 +52,15 @@ p0 = np.array([45e-3, 45, 4e-6, 0.55])
 bounds0 = np.array([[20e-3, 120e-3], [42.5, 80], [1e-6, 9e-6], [0.52, 1.0]]) # [min, max]
 
 # User Inputs for optimization of R_naf, theta, offset, a, and b from i_o = a*w_Pt + b:
-p1 = np.array([45e-3, 45, 0.55, 24.5e-6, -0.60e-6])
-p1 = np.array([54.6322292e-3, 44.9866196, 0.545933492, 24.18e-6, -0.441002786e-6])
+p1 = np.array([55e-3, 45, 0.55, 24.2e-6, -0.40e-6])
 bounds1 = np.array([[20e-3, 120e-3], [42.5, 80], [0.52, 1.0], [24.17e-6, 50e-6], [-0.5e-6, 1e-6]])
 
-# User Inputs for optimization of theta, i_o, offset, c, and d from R_naf = (c*w_Pt^d +35)*1e-3:
-p2 = np.array([45, 2e-6, 0.55, 0.874, -1.083])
-#p2 = np.array([50, 1.58523583e-6, 0.535449905, 0.995444795, -1.16389853])
-bounds2 = np.array([[42.5, 80], [5e-7, 9e-6], [0.52, 1.0], [0., 1.5], [-1.5, 0.]])
+# User Inputs for optimization of theta, i_o, offset, c, d, e from R_naf = (c*w_Pt^d +e)*1e-3:
+p2 = np.array([50, 1.3e-6, 0.65, 0.929, -1.249, 35])
+bounds2 = np.array([[42.5, 80], [5e-7, 9e-6], [0.52, 1.0], [0., 1.5], [-1.5, 0.], [0., 120.]])
 
 # Toggle for which optimization to run (0, 1, or 2):
-tog = 1
+tog = 2
 
 """ Do not edit anything below this line """
 "-----------------------------------------------------------------------------"
@@ -170,8 +168,8 @@ b = -0.434032963e-6"""
 def chi_sq_func2(p_opt): # p_opt[:] = theta, i_o, offset, c, d
     w_Pt_vec = np.array([0.2, 0.1, 0.05, 0.025])
     
-    global w_Pt, theta_opt, i_o_opt, offset_opt, c, d
-    theta_opt, i_o_opt, offset_opt, c, d = p_opt
+    global w_Pt, theta_opt, i_o_opt, offset_opt, c, d, e
+    theta_opt, i_o_opt, offset_opt, c, d, e = p_opt
     print('\n\ntheta, i_o, offset, c, d:', p_opt)
     print('R_naf:', (c*w_Pt_vec**d + 35) *1e-3)
     
@@ -194,17 +192,19 @@ theta = user_inputs.theta = 45.
 i_o = 2e-6
 offset = 0.55
 c = 0.874
-d = -1.083"""
+d = -1.083
+e = 35."""
     
 # Results for tog = 2:
 """
-chi_sq = 69.49687105275932
+chi_sq = 65.40625573579791
 
-theta = user_inputs.theta = 50.2228419
-i_o = 1.27966523e-6
-offset = 0.653522006
-c = 0.929923592
-d = -1.24932356"""
+theta = user_inputs.theta = 50.0625811
+i_o = 2.06131753e-6
+offset = 0.655151490
+c = 0.915326473
+d = -1.23061654
+e = 34.5429028"""
 
 if tog == 0:
     res = minimize(chi_sq_func0, p0, method='L-BFGS-B', bounds=bounds0)
@@ -222,12 +222,13 @@ results.
 
 optimize, tog = 1, 1
 R_naf_opt = user_inputs.R_naf = 54.4607050e-3
-theta_opt = user_inputs.theta = 44.9763477
-i_o_opt = 1.27966523e-6
-offset_opt = 0.545805050
+theta_opt = user_inputs.theta = 50.0625811
+i_o_opt = 2.06131753e-6
+offset_opt = 0.655151490
 a = 24.17e-6
 b = -0.434032963e-6
-c = 0.929923592
-d = -1.24932356"""
+c = 0.915326473
+d = -1.23061654
+e = 34.5429028"""
     
     
