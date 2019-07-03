@@ -2,9 +2,31 @@
 Two pseudo-2D Newman-type models of a PEM Fuel Cell.
 
 ## Objective(s)
-This model simulates the cathode of a proton exchange membrane fuel cell (PEMFC). Although these types of fuel cells have made their way into production, an expensive Pt catalyst has inhibited their growth and manufacturing. Reductions to the amount of Pt have been heavily investigated; however, PEMFCs with low Pt loading have shown poor performance due to losses that have not been sufficiently explained in literature. The objectives of this model were: to incorporate structure-property relationships in an attempt to capture and explain performance losses at low Pt loading, to determine how the modeled catalyst layer (CL) geometry affects transport parameters, and to exercise the model in a search for microstructures that could provide improvements in PEMFC performance.
+This model simulates the cathode of a proton exchange membrane fuel cell (PEMFC). 
+Although these types of fuel cells have made their way into production, an expensive 
+Pt catalyst has inhibited their growth and manufacturing. Reductions to the amount 
+of Pt have been heavily investigated; however, PEMFCs with low Pt loading have shown 
+poor performance due to losses that have not been sufficiently explained in literature. 
+The objectives of this model were: to incorporate structure-property relationships 
+in an attempt to capture and explain performance losses at low Pt loading, to determine 
+how the modeled catalyst layer (CL) geometry affects transport parameters, and to 
+exercise the model in a search for microstructures that could provide improvements in 
+PEMFC performance.
 
-The main difference that sets this model apart from others involves the included structure-property relationships. These additions allow the transport of protons and oxygen through the thin Nafion electrolyte found within the CL to change based on temperature, relative humidity, thickness, and Pt loading. Direct measurements of properties such as conductivity and diffusion coefficients have been challenging with current techniques for the needed length scale of Nafion (<10nm). Many of the few experiments that have been done in a relevant length scale were performed on substrates that are not found within PEMFCs. This is important to note since studies have shown that in nanothin films, Nafion's structure and resulting properties can change due to substrate interactions. Using neutron reflectometry data (to approximate the water volume fractions and structure of nanothin Nafion films) combined with experiments and empirical formulas for bulk Nafion films, three methods were implemented into this model to estimate theoretical transport parameters within the electrolyte phase of the CL.
+The main difference that sets this model apart from others involves the included 
+structure-property relationships. These additions allow the transport of protons 
+and oxygen through the thin Nafion electrolyte found within the CL to change based 
+on temperature, relative humidity, thickness, and Pt loading. Direct measurements 
+of properties such as conductivity and diffusion coefficients have been challenging 
+with current techniques for the needed length scale of Nafion (<10nm). Many of the 
+few experiments that have been done in a relevant length scale were performed on 
+substrates that are not found within PEMFCs. This is important to note since studies 
+have shown that in nanothin films, Nafion's structure and resulting properties can 
+change due to substrate interactions. Using neutron reflectometry data (to approximate 
+the water volume fractions and structure of nanothin Nafion films) combined with 
+experiments and empirical formulas for bulk Nafion films, three methods were implemented 
+into this model to estimate theoretical transport parameters within the electrolyte 
+phase of the CL.
 
 ## Modeling Domains
 In literature, two common microstructures have been used to represent the CL of PEMFCs: core-shell and flooded-agglomerate. Both methods represent attempts to simplify the complex geometries observed from transmission electron microscope (TEM) images of CLs within PEMFCs. The core-shell model represents a smaller length scale in which Pt-covered carbon cores are covered in a shell of Nafion electrolyte. Taking multiple core-shell structures and packing them together inside an additional Nafion shell represents the structure used for the flooded-agglomerate model. Illustrations of these two types of geometries as well as the types of transport incorporated into this model are shown in Figure 1.
