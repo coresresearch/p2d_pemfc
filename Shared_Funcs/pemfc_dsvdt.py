@@ -346,15 +346,15 @@ iPhi_f = int(iSV['phi_dl'] + (Ny_cl-1)*L_cl/Ny_cl)
 # Update and convert i_ext: A/cm^2 -> A/m^2
 cl['i_ext'] = i_ext[0] *100**2
 
-sol = solve_ivp(lambda t,sv: dsvdt_func(t, sv, objs, p, iSV), [0, t_sim], 
+sol = solve_ivp(lambda t, sv: dsvdt_func(t, sv, objs, p, iSV), [0, t_sim], 
                 SV_0, method=method, atol=atol, rtol=rtol, max_step=max_t)
 
 # Calculate extra PEM resistance terms to subtract off:
-R_naf = i_ext*(pem['R_naf'] + 0.5*cl['dy'] / cl['sig_naf_io'] *100**2)
+R_naf_vec = i_ext*(pem['R_naf'] + 0.5*cl['dy'] / cl['sig_naf_io'] *100**2)
 
 # Store solution and update initial values:
 SV_0, sv_save[:,0] = sol.y[:,-1], np.append(i_ext[0], sol.y[:,-1])
-dphi_ss[0] = sol.y[iPhi_f, -1] - dphi_eq_an - R_naf[0]
+dphi_ss[0] = sol.y[iPhi_f, -1] - dphi_eq_an - R_naf_vec[0]
                 
 print('t_f:',sol.t[-1],'i_ext:',round(cl['i_ext']*1e-4,3), 'dPhi:',round(dphi_ss[0],3))
 
@@ -366,13 +366,13 @@ for i in range(len(i_ext) -1):
     # Update and convert i_ext: A/cm^2 -> A/m^2
     cl['i_ext'] = i_ext[i+1] *100**2
 
-    sol = solve_ivp(lambda t,sv: dsvdt_func(t, sv, objs, p, iSV), [0, t_sim], 
+    sol = solve_ivp(lambda t, sv: dsvdt_func(t, sv, objs, p, iSV), [0, t_sim], 
                     SV_0, method=method, atol=atol, rtol=rtol, max_step=max_t)
     
     # Store solution and update initial values:
     SV_0, sv_save[:,i+1] = sol.y[:,-1], np.append(i_ext[i+1], sol.y[:,-1])
 
     eta_ss[i+1] = dphi_ss[0] - sol.y[iPhi_f,-1]
-    dphi_ss[i+1] = sol.y[iPhi_f,-1] - dphi_eq_an - R_naf[i+1]
+    dphi_ss[i+1] = sol.y[iPhi_f,-1] - dphi_eq_an - R_naf_vec[i+1]
 
     print('t_f:',sol.t[-1], 'i_ext:',round(cl['i_ext']*1e-4,3), 'dPhi:',round(dphi_ss[i+1],3))

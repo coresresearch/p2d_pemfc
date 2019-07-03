@@ -73,13 +73,18 @@ import cantera as ct
 "-----------------------------------------------------------------------------"
 model = 'core_shell'                # CL geom: 'core_shell' or 'flooded_agg'
 ctifile = 'pemfc_cs.cti'            # cantera input file to match chosen model
-ver = 1                             # debugging radial diffusion (1:cs, 1-2:fa)
+ver = 1                             # debugging radial diffusion (1:cs, 2:fa)
 
 " Initial electrochemical values "
 i_OCV = 0                           # 0 [A/cm^2] -> or single run if != 0 
-i_ext0 = np.linspace(0.001,0.1,5)   # external currents close to 0 [A/cm^2]
-i_ext1 = np.linspace(0.101,1.0,5)   # external currents [A/cm^2]
-i_ext2 = np.linspace(1.100,2.0,5)   # external currents further from 0 [A/cm^2]
+i_ext0 = np.array([0.05, 0.20, 0.40, 0.80, 1.0, 1.2, 1.5, 1.65, 1.85, 2.0])
+i_ext1 = np.array([])
+i_ext2 = np.array([])
+
+#i_ext0 = np.linspace(0.001,0.1,5)   # external currents close to 0 [A/cm^2]
+#i_ext1 = np.linspace(0.101,1.0,5)   # external currents [A/cm^2]
+#i_ext2 = np.linspace(1.100,2.0,5)   # external currents further from 0 [A/cm^2]
+
 phi_ca_init = 0.7                   # initial cathode potential [V]
 T_ca, P_ca = 333, 1.5*ct.one_atm    # cathode temp [K] and pressure [Pa] at t = 0
 T_an, P_an = 333, 1.5*ct.one_atm    # anode temp [K] and pressure [Pa] at t = 0
@@ -94,7 +99,7 @@ R_naf = 45e-3        # resistance of Nafion membrane [Ohm*cm^2] (45:cs, 60:fa)
 " Pt loading and geometric values "
 area_calcs = 1      # control for area calculations [0:p_Pt, 1:Pt_loading]
 p_Pt = 10           # percentage of Pt covering the carbon particle surface [%]
-w_Pt = 0.2          # loading of Pt on carbon [mg/cm^2]
+#w_Pt = 0.2          # loading of Pt on carbon [mg/cm^2]
 rho_Pt = 21.45e3    # density of Pt for use in area property calcs [kg/m^3]
 r_c = 50e-9         # radius of single carbon particle [m] (50:cs, 25:fa)
 r_Pt = 1e-9         # radius of Pt 1/2 sphere sitting on C surface [m]
@@ -123,8 +128,8 @@ ind_e = 0           # index of electrons in Pt surface phase... from cti
 method = 'BDF'      # method for solve_ivp [eg: BDF,RK45,LSODA,Radau,etc...]
 t_sim = 1e2         # time span of integration [s]
 Ny_gdl = 3          # number of depth discretizations for GDL
-Ny_cl = 5           # number of depth discretizations for CL
-Nr_cl = 5           # number of radial discretizations for CL nafion shells
+Ny_cl = 3           # number of depth discretizations for CL
+Nr_cl = 3           # number of radial discretizations for CL nafion shells
 
 " Modify tolerance for convergence "
 max_t = t_sim       # maximum allowable time step for solver [s]
@@ -135,14 +140,15 @@ rtol = 1e-6         # relative tolerance passed to solver
 post_only = 0       # turn on to only run post-processing
 debug = 0           # turn on to plot first node variables vs time
 radial = 0          # turn on radial O2 plots for each Nafion shell
-grads = 0           # turn on to plot O2 and Phi gradients in depth of cathode
+grads = 0           # turn on to plot O2, Phi, i_far gradients vs depth of CL
 polar = 1           # turn on to generate full cell polarization curves
 over_p = 0          # turn on to plot overpotential curve for cathode side
 
 " Verification settings - (0: off and 1: on) unless otherwise stated "
 data = 1            # include data from Owejan et. al. on polarization if available
 i_ver = 0           # verify current between GDL and CL with O2 flux calcs
-i_find = 0.5        # current to use in i_ver processing [A/cm^2]
+
+i_find = 0.0001     # current from polarization curve to use in i_ver processing
 
 " Plotting options "
 font_nm = 'Arial'   # name of font for plots
@@ -157,6 +163,13 @@ save = 0                        # toggle saving on/off with '1' or '0'
 ###############################################################################
 ###############################################################################
 ###############################################################################
+
+if model == 'core_shell': 
+    ctifile, ver, R_naf, r_c = 'pemfc_cs.cti', 1, 45e-3, 50e-9
+    sig_method, D_O2_method = 'mix', 'mix'
+elif model == 'flooded_agg': 
+    ctifile, ver, R_naf, r_c = 'pemfc_fa.cti', 2, 60e-3, 25e-9
+    sig_method, D_O2_method = 'sun', 'sun'
 
 """ Process inputs from this file and run model """
 "-----------------------------------------------------------------------------"

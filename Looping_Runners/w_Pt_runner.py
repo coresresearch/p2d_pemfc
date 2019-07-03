@@ -11,7 +11,7 @@ Notes:
     desired user inputs should be specified in the file pemfc_runner.py.
     
     Read through the string comments for each section and uncomment the code 
-    below it desired to produce its outputs.
+    below it in order to produce its outputs.
 """
 
 import os
@@ -26,21 +26,22 @@ font = plt.matplotlib.font_manager.FontProperties(family=font_nm, size=font_sz)
 plt.rcParams.update({'font.size': font_sz})
 
 " Loop through Pt loading polarization curves: "
-#folder_nm_generic = 'cs_Pt_loop_'
+#folder_nm_generic = 'cs_Pt_loop_' # pre-fix to all folders for saving
 #
-#w_Pt_vec = np.array([0.2, 0.1, 0.05, 0.025])
-##cti = ['pemfc2.cti', 'pemfc1.cti', 'pemfc05.cti', 'pemfc025.cti'] #don't uncomment
+#y_model = np.array([])
+#w_Pt_vec = np.array([0.2, 0.1, 0.05, 0.025]) # Pt-loading values to loop through
 #for i, w in enumerate(w_Pt_vec):
 #    from pemfc_runner import *
 #    import pemfc_runner as user_inputs
 #    
-#    save = user_inputs.save = 1
+#    save = user_inputs.save = 0 # change to one if wanting to save outputs
 #    w_Pt = user_inputs.w_Pt = w
+#                
 #    folder_name = user_inputs.folder_name = folder_nm_generic + str(w_Pt) + 'mgcm-2'
-##    ctifile = run.ctifile = cti[i] #don't uncomment
 #    exec(open("Shared_Funcs/pemfc_pre.py").read())
 #    exec(open("Shared_Funcs/pemfc_dsvdt.py").read())
 #    exec(open("Shared_Funcs/pemfc_post.py").read())
+#    y_model = np.hstack([y_model, dphi_ss[1:]])
 #    if save == 1:
 #        ModuleWriter(cwd +'/Saved_Results/' +folder_name +'/user_inputs.csv', user_inputs)
 
@@ -85,32 +86,32 @@ plt.rcParams.update({'font.size': font_sz})
 #    plt.tight_layout()
 #    
 #    if w_Pt == 0.2:
-#        x = np.array([0.008, 0.051, 0.201, 0.403, 0.802, 1.002, 1.202, 1.501, 
-#                      1.651, 1.851, 2.000])
+#        x = np.array([0.000, 0.050, 0.200, 0.400, 0.800, 1.000, 1.200, 1.500, 
+#                      1.650, 1.850, 2.000])
 #        y = np.array([0.952, 0.849, 0.803, 0.772, 0.731, 0.716, 0.700, 0.675, 
 #                      0.665, 0.647, 0.634])
 #        yerr = np.array([0, 0.012, 0.007, 0.007, 0.012, 0.001, 0.008, 0.007,
 #                         0.007, 0.009, 0.009])
 #        color, fmt, lbl = 'black', '-x', r'0.2 mg/cm$^$2'
 #    elif w_Pt == 0.1:
-#        x = np.array([0.006, 0.053, 0.201, 0.401, 0.802, 1.002, 1.200, 1.499, 
-#                      1.651, 1.851, 2.000])
+#        x = np.array([0.000, 0.050, 0.200, 0.400, 0.800, 1.000, 1.200, 1.500, 
+#                      1.650, 1.850, 2.000])
 #        y = np.array([0.930, 0.834, 0.785, 0.754, 0.711, 0.691, 0.673, 0.649, 
 #                      0.635, 0.615, 0.598])
 #        yerr = np.array([0, 0.009, 0.007, 0.005, 0.007, 0.011, 0.011, 0.007, 
 #                         0.009, 0.011, 0.011])
 #        color, fmt, lbl = 'black', '-o', r'0.1 mg/cm$^$2'
 #    elif w_Pt == 0.05:
-#        x = np.array([0.008, 0.053, 0.201, 0.401, 0.800, 1.000, 1.200, 1.500, 
-#                      1.651, 1.850, 2.001])
+#        x = np.array([0.000, 0.050, 0.200, 0.400, 0.800, 1.000, 1.200, 1.500, 
+#                      1.650, 1.850, 2.000])
 #        y = np.array([0.919, 0.810, 0.760, 0.724, 0.674, 0.653, 0.634, 0.603,
 #                      0.585, 0.558, 0.537])
 #        yerr = np.array([0, 0.008, 0.006, 0.006, 0.007, 0.007, 0.005, 0.005, 
 #                         0.006, 0.007, 0.007])
 #        color, fmt, lbl = 'black', '-s', r'0.05 mg/cm$^$2'
 #    elif w_Pt == 0.025:
-#        x = np.array([0.003, 0.049, 0.202, 0.404, 0.803, 1.005, 1.204, 1.503, 
-#                      1.653, 1.851, 2.004])
+#        x = np.array([0.000, 0.050, 0.200, 0.400, 0.800, 1.000, 1.200, 1.500, 
+#                      1.650, 1.850, 2.000])
 #        y = np.array([0.910, 0.785, 0.724, 0.683, 0.626, 0.598, 0.572, 0.527, 
 #                      0.502, 0.463, 0.430])
 #        yerr = np.array([0, 0.004, 0.010, 0.014, 0.013, 0.013, 0.019, 0.024, 
