@@ -139,9 +139,10 @@ grads = 0           # turn on to plot O2 and Phi gradients in depth of cathode
 polar = 1           # turn on to generate full cell polarization curves
 over_p = 0          # turn on to plot overpotential curve for cathode side
 
-" Verification settings "
+" Verification settings - (0: off and 1: on) unless otherwise stated "
+data = 1            # include data from Owejan et. al. on polarization if available
 i_ver = 0           # verify current between GDL and CL with O2 flux calcs
-i_find = 0.5        # current from polarization curve to use in i_ver processing
+i_find = 0.5        # current to use in i_ver processing [A/cm^2]
 
 " Plotting options "
 font_nm = 'Arial'   # name of font for plots
