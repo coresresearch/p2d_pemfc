@@ -1,4 +1,3 @@
-# check branch
 """ Model Description """
 "-----------------------------------------------------------------------------"
 """This model is a half cell model of of PEM fuel cell cathode. The runner file
@@ -145,8 +144,10 @@ grads = 0           # turn on to plot O2, Phi, i_far gradients vs depth of CL
 polar = 1           # turn on to generate full cell polarization curves
 over_p = 0          # turn on to plot overpotential curve for cathode side
 
-" Verification settings "
+" Verification settings - (0: off and 1: on) unless otherwise stated "
+data = 1            # include data from Owejan et. al. on polarization if available
 i_ver = 0           # verify current between GDL and CL with O2 flux calcs
+
 i_find = 0.0001     # current from polarization curve to use in i_ver processing
 
 " Plotting options "
