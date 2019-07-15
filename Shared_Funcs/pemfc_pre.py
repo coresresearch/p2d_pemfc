@@ -16,7 +16,8 @@ gas_ca.TP = T_ca, P_ca
 naf_b_ca = ct.Solution(ctifile, 'naf_bulk_ca')
 naf_b_ca.TP = T_ca, P_ca
 
-pt_s_ca = ct.Interface(ctifile, 'Pt_surf_ca_2s', [carb_ca, naf_b_ca, gas_ca])
+rm = str(rxn_mech)
+pt_s_ca = ct.Interface(ctifile, 'Pt_surf_ca_' + rm, [carb_ca, naf_b_ca, gas_ca])
 pt_s_ca.TP = T_ca, P_ca
 
 naf_s_ca = ct.Interface(ctifile, 'naf_surf_ca', [naf_b_ca, gas_ca])
@@ -52,8 +53,9 @@ naf_s_ca.basis = basis
 # Change parameters for optimization only:
 if 'optimize' in vars(): None
 else: optimize = 0
-    
-if optimize == 1:
+
+# If running optimization w/ the 1-step reaction mechanism:
+if all([optimize == 1, rxn_mech == '1s']):
     if tog == 2:
         R_naf = (c*w_Pt**d + e) *1e-3
     else:
@@ -70,10 +72,31 @@ if optimize == 1:
     pt_s_ca.modify_reaction(0, Rxn1)
     
     O2 = naf_b_ca.species(naf_b_ca.species_index('O2(Naf)'))
-    fuel_coeffs = O2.thermo.coeffs
-    fuel_coeffs[[1,8]] = np.array([3.28253784 +offset_opt, 3.782456360 +offset_opt])
+    O2_thermo = O2.thermo.coeffs
+    O2_thermo[[1,8]] = np.array([3.28253784 +offset_opt, 3.782456360 +offset_opt])
     O2.thermo = ct.NasaPoly2(200, 3500, ct.one_atm, fuel_coeffs)
     naf_b_ca.modify_species(naf_b_ca.species_index('O2(Naf)'), O2)
+  
+# If running optimization w/ the 2-step reaction mechanism:
+elif all([optimize == 1, rxn_mech == '2s']):
+    R_naf = R_naf_opt
+    theta = theta_opt
+    
+    A = A_opt
+    i_o = i_o_opt
+    Rxn1 = pt_s_ca.reaction(0)
+    Rxn2 = pt_s_ca.reaction(1)
+    Rxn1.rate = ct.Arrhenius(A, 0, 0)
+    Rxn2.rate = ct.Arrhenius(i_o, 0, 0)
+    pt_s_ca.modify_reaction(0, Rxn1)
+    pt_s_ca.modify_reaction(1, Rxn2)
+    
+    O2 = naf_b_ca.species(naf_b_ca.species_index('O2(Naf)'))
+    O2_thermo = O2.thermo.coeffs
+    O2_thermo[[1,8]] = np.array([3.28253784 +offset_opt, 3.782456360 +offset_opt])
+    O2.thermo = ct.NasaPoly2(200, 3500, ct.one_atm, fuel_coeffs)
+    naf_b_ca.modify_species(naf_b_ca.species_index('O2(Naf)'), O2)
+
 ###############################################################################
 
 " Store phases in a common 'objs' dict: "

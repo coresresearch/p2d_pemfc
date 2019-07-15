@@ -71,9 +71,8 @@ import cantera as ct
 
 """ User Input Parameters """
 "-----------------------------------------------------------------------------"
-model = 'flooded_agg'               # CL geom: 'core_shell' or 'flooded_agg'
-ctifile = 'pemfc_cs.cti'            # cantera input file to match chosen model
-ver = 1                             # debugging radial diffusion (1:cs, 2:fa)
+model = 'core_shell'                # CL geom: 'core_shell' or 'flooded_agg'
+rxn_mech = '2s'                     # '1s' or '2s' for 1- or 2-step reaction
 
 " Initial electrochemical values "
 i_OCV = 0                           # 0 [A/cm^2] -> or single run if != 0 
@@ -94,12 +93,12 @@ RH = 95              # relative humidity of Nafion phase [%]
 C_dl = 1.5e-9        # capacitance of double layer [F/m^2]
 sig_method = 'mix'   # 'lam', 'bulk', 'mix', or 'sun' for conductivity method
 D_O2_method = 'mix'  # 'lam', 'bulk', 'mix', or 'sun' for D_O2 method
-R_naf = 45e-3        # resistance of Nafion membrane [Ohm*cm^2] (45:cs, 60:fa)
+R_naf = 45e-3        # resistance of Nafion membrane [Ohm*cm^2]
 
 " Pt loading and geometric values "
 area_calcs = 1      # control for area calculations [0:p_Pt, 1:Pt_loading]
 p_Pt = 10           # percentage of Pt covering the carbon particle surface [%]
-#w_Pt = 0.2          # loading of Pt on carbon [mg/cm^2]
+w_Pt = 0.2          # loading of Pt on carbon [mg/cm^2]
 rho_Pt = 21.45e3    # density of Pt for use in area property calcs [kg/m^3]
 r_c = 50e-9         # radius of single carbon particle [m] (50:cs, 25:fa)
 r_Pt = 1e-9         # radius of Pt 1/2 sphere sitting on C surface [m]
@@ -144,11 +143,10 @@ grads = 0           # turn on to plot O2, Phi, and i_far gradients vs CL depth
 polar = 1           # turn on to generate full cell polarization curves
 over_p = 0          # turn on to plot overpotential curve for cathode
 
-<<<<<<< HEAD
-" Verification settings - (0: off and 1: on) unless otherwise stated "
-data = 1            # include data from Owejan et. al. on polarization if available
-i_ver = 1           # verify current between GDL and CL with O2 flux calcs
-i_find = 0.5        # current from polarization curve to use in i_ver processing
+" Verification settings "
+data = 1            # include data from Owejan et. al. if available (0: off, 1: on)
+i_ver = 1           # verify current between GDL and CL (0: off, 1: on)
+i_find = 0.5        # current from polarization to use in i_ver calculation [A/cm^2]
 
 " Plotting options "
 font_nm = 'Arial'   # name of font for plots

@@ -26,24 +26,24 @@ font = plt.matplotlib.font_manager.FontProperties(family=font_nm, size=font_sz)
 plt.rcParams.update({'font.size': font_sz})
 
 " Loop through Pt loading polarization curves: "
-#folder_nm_generic = 'cs_Pt_loop_' # pre-fix to all folders for saving
-#
-#y_model = np.array([])
-#w_Pt_vec = np.array([0.2, 0.1, 0.05, 0.025]) # Pt-loading values to loop through
-#for i, w in enumerate(w_Pt_vec):
-#    from pemfc_runner import *
-#    import pemfc_runner as user_inputs
-#    
-#    save = user_inputs.save = 0 # change to one if wanting to save outputs
-#    w_Pt = user_inputs.w_Pt = w
-#                
-#    folder_name = user_inputs.folder_name = folder_nm_generic + str(w_Pt) + 'mgcm-2'
-#    exec(open("Shared_Funcs/pemfc_pre.py").read())
-#    exec(open("Shared_Funcs/pemfc_dsvdt.py").read())
-#    exec(open("Shared_Funcs/pemfc_post.py").read())
-#    y_model = np.hstack([y_model, dphi_ss[1:]])
-#    if save == 1:
-#        ModuleWriter(cwd +'/Saved_Results/' +folder_name +'/user_inputs.csv', user_inputs)
+folder_nm_generic = 'cs_Pt_loop_' # pre-fix to all folders for saving
+
+y_model = np.array([])
+w_Pt_vec = np.array([0.2, 0.1, 0.05, 0.025]) # Pt-loading values to loop through
+for i, w in enumerate(w_Pt_vec):
+    from pemfc_runner import *
+    import pemfc_runner as user_inputs
+    
+    save = user_inputs.save = 0 # change to one if wanting to save outputs
+    w_Pt = user_inputs.w_Pt = w
+                
+    folder_name = user_inputs.folder_name = folder_nm_generic + str(w_Pt) + 'mgcm-2'
+    exec(open("Shared_Funcs/pemfc_pre.py").read())
+    exec(open("Shared_Funcs/pemfc_dsvdt.py").read())
+    exec(open("Shared_Funcs/pemfc_post.py").read())
+    y_model = np.hstack([y_model, dphi_ss[1:]])
+    if save == 1:
+        ModuleWriter(cwd +'/Saved_Results/' +folder_name +'/user_inputs.csv', user_inputs)
 
 " Plot sig_io and D_O2 as f(w_Pt) for 'mix' method "
 #clr = ['C0', 'C1', 'C2', 'C3']
