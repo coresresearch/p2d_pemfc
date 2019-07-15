@@ -8,11 +8,12 @@ import sys
 
 """ Control options for derivative functions """
 "-----------------------------------------------------------------------------"
-# Toggles to turn on/off inner/outer rxns and gas transports:------------------
+# Toggles to turn on/off in/outer rxns, gas transports, or surface tracking:---
 pt_rxn = 1
 o2_rxn = 1
 gas_tog = 1
 gdl_tog = 1
+surf_tog = 1
 
 """ Define CL dsvdt for core-shell model """
 "-----------------------------------------------------------------------------"
@@ -106,7 +107,7 @@ def dsvdt_cl_cs(t, sv, dsvdt, objs, p, iSV, gdl_BC):
         
         # Pt surface coverages:
         dsvdt[iSV['theta_pt_k'] +cl_ymv] = pt_s_ca.get_net_production_rates(pt_s_ca)\
-                                         *cl['1/gamma'] *pt_rxn
+                                         *cl['1/gamma'] *pt_rxn *surf_tog
         
         # Innermost Nafion node densities:
         iLast = iSV['rho_naf_k'] +cl_ymv +(cl['Nr'] -1)*cl['nxt_r']
@@ -228,7 +229,8 @@ def dsvdt_cl_fa(t, sv, dsvdt, objs, p, iSV, gdl_BC):
 
             # Pt surface coverages:
             iMid = iSV['theta_pt_k'] +cl_ymv +j*cl['nxt_r']
-            dsvdt[iMid] = pt_s_ca.get_net_production_rates(pt_s_ca) *cl['1/gamma'] *pt_rxn
+            dsvdt[iMid] = pt_s_ca.get_net_production_rates(pt_s_ca) *cl['1/gamma']\
+                        *pt_rxn *surf_tog
                                         
 
             # Combine ORR and flux to get overall ODE for Nafion densities:
@@ -254,7 +256,8 @@ def dsvdt_cl_fa(t, sv, dsvdt, objs, p, iSV, gdl_BC):
                     
         # Pt surface coverages:
         iLast = iSV['theta_pt_k'] +cl_ymv +(cl['Nr'] -1)*cl['nxt_r']
-        dsvdt[iLast] = pt_s_ca.get_net_production_rates(pt_s_ca) *cl['1/gamma'] *pt_rxn
+        dsvdt[iLast] = pt_s_ca.get_net_production_rates(pt_s_ca) *cl['1/gamma']\
+                     *pt_rxn *surf_tog
 
         # Combine ORR and flux to get overall ODE:
         iLast = iSV['rho_naf_k'] +cl_ymv +(cl['Nr'] -1)*cl['nxt_r']

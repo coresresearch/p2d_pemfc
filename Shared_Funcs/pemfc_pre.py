@@ -16,7 +16,7 @@ gas_ca.TP = T_ca, P_ca
 naf_b_ca = ct.Solution(ctifile, 'naf_bulk_ca')
 naf_b_ca.TP = T_ca, P_ca
 
-pt_s_ca = ct.Interface(ctifile, 'Pt_surf_ca', [carb_ca, naf_b_ca, gas_ca])
+pt_s_ca = ct.Interface(ctifile, 'Pt_surf_ca_2s', [carb_ca, naf_b_ca, gas_ca])
 pt_s_ca.TP = T_ca, P_ca
 
 naf_s_ca = ct.Interface(ctifile, 'naf_surf_ca', [naf_b_ca, gas_ca])

@@ -72,13 +72,27 @@ ideal_interface(name = "Pt_surf_an",
                 )
 
 
-ideal_interface(name = "Pt_surf_ca",
+# If considering a 1-step mechanism w/o surface sites
+ideal_interface(name = "Pt_surf_ca_1s",
                 elements = " Pt  H  O ",
                 species = """ PT(S) O(S) """,
                 phases = "metal naf_bulk_ca cathode_gas",
                 site_density = 2.7063e-9,
-                reactions = "catsurf_ca-*",
-         	options = ['skip_undeclared_elements',
+                reactions = "catsurf_ca-1*",
+         	      options = ['skip_undeclared_elements',
+                     'skip_undeclared_species'],
+                initial_state = state(temperature = 300.0,
+                                      coverages = 'O(S):0.7, PT(S):0.3')
+                )
+
+# If considering a 2-step mechanism w/ surface sites
+ideal_interface(name = "Pt_surf_ca_2s",
+                elements = " Pt  H  O ",
+                species = """ PT(S) O(S) """,
+                phases = "metal naf_bulk_ca cathode_gas",
+                site_density = 2.7063e-9,
+                reactions = "catsurf_ca-2*",
+         	      options = ['skip_undeclared_elements',
                      'skip_undeclared_species'],
                 initial_state = state(temperature = 300.0,
                                       coverages = 'O(S):0.7, PT(S):0.3')
@@ -346,9 +360,12 @@ surface_reaction( "2 H(Naf) + 2 electron <=> H2(Naf)", [2.0e-5, 0, 13683], beta=
 
 #  Proton charge transfer at cathode surface:
 # Activation energy adopted (loosely) from Anderson, Markovic, etal J Phys Chem B, 2005
-# surface_reaction( "4 H(Naf) + O2(Naf) + 4 electron + 2 PT(S) <=> 2 H2O + 2 PT(S)", [4e10, 0, 0], rateCoeff="exchangecurrentdensity", beta=0.5, id="catsurf_ca-1")
-surface_reaction( "O2(Naf) + 2 PT(S) <=> 2 O(S)", [5e5, 0, 0], rateCoeff="exchangecurrentdensity", beta=0.5, id="catsurf_ca-1")
-surface_reaction( "O(S) + 2 H(Naf) + 2 electron <=> H2O + PT(S)", [1.5e3, 0, 0], rateCoeff="exchangecurrentdensity", beta=0.5, id="catsurf_ca-2")
+surface_reaction( "4 H(Naf) + O2(Naf) + 4 electron + 2 PT(S) <=> 2 H2O + 2 PT(S)", [4e10, 0, 0],
+                   rate_coeff_type="exchangecurrentdensity", beta=0.5, id="catsurf_ca-1s")
+
+surface_reaction( "O2(Naf) + 2 PT(S) <=> 2 O(S)", [5e16, 0, 0], beta=0.5, id="catsurf_ca-2s1")
+surface_reaction( "O(S) + 2 H(Naf) + 2 electron <=> H2O + PT(S)", [1.5e3, 0, 0],
+                   rate_coeff_type="exchangecurrentdensity", beta=0.5, id="catsurf_ca-2s2")
 
 #  Oxygen transfer between gas and Nafion - set to be fast
 surface_reaction( "O2 <=> O2(Naf)", [2e10,0,1000], id="elyte_ca-1") #[2e15,0,1000], id="elyte_ca-1")
