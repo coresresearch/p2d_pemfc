@@ -230,8 +230,7 @@ def dsvdt_cl_fa(t, sv, dsvdt, objs, p, iSV, gdl_BC):
             # Pt surface coverages:
             iMid = iSV['theta_pt_k'] +cl_ymv +j*cl['nxt_r']
             dsvdt[iMid] = pt_s_ca.get_net_production_rates(pt_s_ca) *cl['1/gamma']\
-                        *pt_rxn *surf_tog
-                                        
+                        *pt_rxn *surf_tog                                        
 
             # Combine ORR and flux to get overall ODE for Nafion densities:
             iMid = iSV['rho_naf_k'] +cl_ymv +j*cl['nxt_r']
