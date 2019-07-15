@@ -165,7 +165,7 @@ offset = 0.545805050
 a = 24.17e-6
 b = -0.434032963e-6"""
 
-def chi_sq_func2(p_opt): # p_opt[:] = theta, i_o, offset, c, d
+def chi_sq_func2(p_opt): # p_opt[:] = theta, offset, i_o, c, d, e
     w_Pt_vec = np.array([0.2, 0.1, 0.05, 0.025])
     
     global w_Pt, theta_opt, i_o_opt, offset_opt, c, d, e

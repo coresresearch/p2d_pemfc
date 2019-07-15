@@ -8,15 +8,17 @@ import sys
 
 """ Control options for derivative functions """
 "-----------------------------------------------------------------------------"
-# Toggles to turn on/off inner/outer rxns and gas transports:------------------
+# Toggles to turn on/off in/outer rxns, gas transports, or surface tracking:---
 pt_rxn = 1
 o2_rxn = 1
 gas_tog = 1
 gdl_tog = 1
+surf_tog = 1
 
 """ Define CL dsvdt for core-shell model """
 "-----------------------------------------------------------------------------"
 def dsvdt_cl_cs(t, sv, dsvdt, objs, p, iSV, gdl_BC):
+    """ Set up conditions at GDL/CL BC """
     # Initialize indecies for looping:-----------------------------------------
     cl_ymv = 0  # CL y direction mover (y: GDL -> Elyte)
     
@@ -70,7 +72,7 @@ def dsvdt_cl_cs(t, sv, dsvdt, objs, p, iSV, gdl_BC):
         rho_k2 = sv[iSV['rho_naf_k'] +cl_ymv +cl['nxt_r']]
         rho_flx_inr = radial_fdiff(rho_k1, rho_k2, cl, 0, ver, 'core_shell')
         
-        # Combine absorption and flux to get overall ODE:
+        # Combine absorption and flux to get overall ODE for Nafion densities:
         dsvdt[iSV['rho_naf_k'] +cl_ymv] = o2_rxn *rho_dot_n *cl['1/Vf_shl'][0]\
                                         - rho_flx_inr *cl['1/r_j'][0]**2 *cl['1/t_shl'][0]
                                         
@@ -98,10 +100,16 @@ def dsvdt_cl_cs(t, sv, dsvdt, objs, p, iSV, gdl_BC):
         naf_b_ca.electric_potential = -sv[iSV['phi_dl'] +cl_ymv]
         naf_s_ca.electric_potential = -sv[iSV['phi_dl'] +cl_ymv]
         
+        pt_s_ca.coverages = sv[iSV['theta_pt_k'] +cl_ymv]
         naf_b_ca.TDY = sv[iSV['T_cl'] +cl_ymv], sum(rho_k1), rho_k1
         rho_dot_n = pt_s_ca.get_net_production_rates(naf_b_ca) *cl['SApv_pt']\
                   *cl['1/eps_n'] *naf_b_ca.molecular_weights
         
+        # Pt surface coverages:
+        dsvdt[iSV['theta_pt_k'] +cl_ymv] = pt_s_ca.get_net_production_rates(pt_s_ca)\
+                                         *cl['1/gamma'] *pt_rxn *surf_tog
+        
+        # Innermost Nafion node densities:
         iLast = iSV['rho_naf_k'] +cl_ymv +(cl['Nr'] -1)*cl['nxt_r']
         dsvdt[iLast] = pt_rxn *rho_dot_n *cl['1/Vf_shl'][-1] \
                      + rho_flx_otr *cl['1/r_j'][-1]**2 *cl['1/t_shl'][-1]
@@ -133,6 +141,7 @@ def dsvdt_cl_cs(t, sv, dsvdt, objs, p, iSV, gdl_BC):
 """ Define CL dsvdt for flooded-agglomerate model """
 "-----------------------------------------------------------------------------"
 def dsvdt_cl_fa(t, sv, dsvdt, objs, p, iSV, gdl_BC):
+    """ Set up conditions at GDL/CL BC """
     # Initialize indecies for looping:-----------------------------------------
     cl_ymv = 0  # CL y direction mover (y: GDL -> Elyte)
     
@@ -210,6 +219,7 @@ def dsvdt_cl_fa(t, sv, dsvdt, objs, p, iSV, gdl_BC):
             rho_k2 = sv[iSV['rho_naf_k'] +cl_ymv +(j+1)*cl['nxt_r']]
             rho_flx_inr = radial_fdiff(rho_k1, rho_k2, cl, j+1, ver, 'flooded_agg')
 
+            pt_s_ca.coverages = sv[iSV['theta_pt_k'] +cl_ymv +j*cl['nxt_r']]
             naf_b_ca.TDY = sv[iSV['T_cl'] +cl_ymv], sum(rho_k1), rho_k1
             rho_dot_n = pt_s_ca.get_net_production_rates(naf_b_ca) *cl['SApv_pt']\
                       *cl['1/eps_n'] *naf_b_ca.molecular_weights *cl['Vf_ishl'][j]
@@ -217,7 +227,12 @@ def dsvdt_cl_fa(t, sv, dsvdt, objs, p, iSV, gdl_BC):
             i_Far_r[j] = pt_rxn *pt_s_ca.get_net_production_rates(carb_ca)\
                        *ct.faraday *cl['Vf_ishl'][j]
 
-            # Combine ORR and flux to get overall ODE:
+            # Pt surface coverages:
+            iMid = iSV['theta_pt_k'] +cl_ymv +j*cl['nxt_r']
+            dsvdt[iMid] = pt_s_ca.get_net_production_rates(pt_s_ca) *cl['1/gamma']\
+                        *pt_rxn *surf_tog                                        
+
+            # Combine ORR and flux to get overall ODE for Nafion densities:
             iMid = iSV['rho_naf_k'] +cl_ymv +j*cl['nxt_r']
             dsvdt[iMid] = rho_flx_otr - rho_flx_inr + pt_rxn *rho_dot_n
 
@@ -230,12 +245,18 @@ def dsvdt_cl_fa(t, sv, dsvdt, objs, p, iSV, gdl_BC):
         rho_flx_inr = np.zeros(naf_b_ca.n_species)
 
         # Set the phases for ORR at the Pt surface:
+        pt_s_ca.coverages = sv[iSV['theta_pt_k'] +cl_ymv +(cl['Nr'] -1)*cl['nxt_r']]
         naf_b_ca.TDY = sv[iSV['T_cl'] +cl_ymv], sum(rho_k1), rho_k1
         rho_dot_n = pt_s_ca.get_net_production_rates(naf_b_ca) *cl['SApv_pt']\
                   *cl['1/eps_n'] *naf_b_ca.molecular_weights *cl['Vf_ishl'][-1]
 
         i_Far_r[-1] = pt_rxn *pt_s_ca.get_net_production_rates(carb_ca)\
                     *ct.faraday *cl['Vf_ishl'][-1]
+                    
+        # Pt surface coverages:
+        iLast = iSV['theta_pt_k'] +cl_ymv +(cl['Nr'] -1)*cl['nxt_r']
+        dsvdt[iLast] = pt_s_ca.get_net_production_rates(pt_s_ca) *cl['1/gamma']\
+                     *pt_rxn *surf_tog
 
         # Combine ORR and flux to get overall ODE:
         iLast = iSV['rho_naf_k'] +cl_ymv +(cl['Nr'] -1)*cl['nxt_r']
@@ -324,12 +345,12 @@ def dsvdt_func(t, sv, objs, p, iSV):
     elif model == 'flooded_agg':
         dsvdt = dsvdt_cl_fa(t, sv, dsvdt, objs, p, iSV, gdl_BC)
 
-#        print(t)
-#        print(dsvdt)
+#    print(t)
+#    print(dsvdt)
 #
-#        user_in = input('"Enter" to continue or "Ctrl+d" to cancel.')   
-#        if user_in == KeyboardInterrupt:
-#            sys.exit(0)
+#    user_in = input('"Enter" to continue or "Ctrl+d" to cancel.')   
+#    if user_in == KeyboardInterrupt:
+#        sys.exit(0)
 
     return dsvdt
 
