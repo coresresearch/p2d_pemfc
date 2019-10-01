@@ -38,7 +38,7 @@ from Shared_Funcs.read_write_save_funcs import *
 """ Post-processing for Plotting and Other Results """
 "-----------------------------------------------------------------------------"
 # Update plot settings:
-plt.close('all')
+#plt.close('all')
 font = plt.matplotlib.font_manager.FontProperties(family=font_nm, size=font_sz)
 plt.rcParams.update({'font.size': font_sz})
 
@@ -374,7 +374,7 @@ if polar:
         yerr = np.array([0, 0.012, 0.007, 0.007, 0.012, 0.001, 0.008, 0.007,
                          0.007, 0.009, 0.009])
         color = 'C0'
-    elif all([data, w_Pt == 0.1}):
+    elif all([data, w_Pt == 0.1]):
         x = np.array([0.000, 0.050, 0.200, 0.400, 0.800, 1.000, 1.200, 1.500, 
                       1.650, 1.850, 2.000])
         y = np.array([0.930, 0.834, 0.785, 0.754, 0.711, 0.691, 0.673, 0.649, 
