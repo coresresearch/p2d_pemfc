@@ -1,3 +1,6 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3468679.svg)](https://doi.org/10.5281/zenodo.3468679)
+
+
 # p2d_pemfc
 Two pseudo-2D Newman-type models of a PEM Fuel Cell.
 
@@ -98,25 +101,27 @@ website [here](https://www.spyder-ide.org/).
 ## License
 This tool is released under the BSD-3 clause license, see LICENSE for details.
 
+
 ## Citing the Model
-This model is versioned using Zenodo:
+ This model is versioned using Zenodo:
+[![DOI](https://zenodo.org/badge/3468679.svg)](https://zenodo.org/badge/latestdoi/3468679)
 
 If you use this tool as part of a scholarly work, please cite using:
 
-> C.R. Randall and S.C. DeCaluwe. (2019) P2D PEMFC Model v1.0 [software]. Zenodo.
+> C.R. Randall and S.C. DeCaluwe. (2019) P2D PEMFC Model v1.1 [software]. Zenodo. https://doi.org/10.5281/zenodo.3468679
 
 A BibTeX entry for LaTeX users is
 
 ```TeX
 @misc{2dPorousFlux,
-    author = {Corey R. Randall and Steven C. DeCaluwe},
+    author = {Corey R. Randall and Steven C DeCaluwe},
     year = 2019,
-    title = {P2D PEMFC Model v1.0},
-    doi = {},
-    url = {},
+    title = {P2D PEMFC Model v1.1},
+    doi = {10.5281/zenodo.3468679},
+    url = {https://github.com/coresresearch/p2d_pemfc},
 }
 ```
 
-In both cases, please update the entry with the version used. The DOI for the latest 
-version is given in the badge at the top, or alternately <zenodo link here> will
+In both cases, please update the entry with the version used. The DOI for the latest version is
+given in the badge at the top, or alternately <https://doi.org/10.5281/zenodo.3468679> will
 take you to the latest version (and generally represents all versions).
