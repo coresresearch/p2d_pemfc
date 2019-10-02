@@ -114,7 +114,7 @@ A BibTeX entry for LaTeX users is
 
 ```TeX
 @misc{P2D_PEMFC,
-    author = {Corey R. Randall and Steven C DeCaluwe},
+    author = {Corey R. Randall and Steven C. DeCaluwe},
     year = 2019,
     title = {P2D PEMFC Model v1.1},
     doi = {10.5281/zenodo.3468679},
