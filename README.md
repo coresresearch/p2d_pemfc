@@ -113,7 +113,7 @@ If you use this tool as part of a scholarly work, please cite using:
 A BibTeX entry for LaTeX users is
 
 ```TeX
-@misc{2dPorousFlux,
+@misc{P2D_PEMFC,
     author = {Corey R. Randall and Steven C DeCaluwe},
     year = 2019,
     title = {P2D PEMFC Model v1.1},
