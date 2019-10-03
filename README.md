@@ -103,8 +103,8 @@ This tool is released under the BSD-3 clause license, see LICENSE for details.
 
 
 ## Citing the Model
- This model is versioned using Zenodo:
-[![DOI](https://zenodo.org/badge/3468679.svg)](https://zenodo.org/badge/latestdoi/3468679)
+ This model is versioned using Zenodo: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3468679.svg)](https://doi.org/10.5281/zenodo.3468679)
+
 
 If you use this tool as part of a scholarly work, please cite using:
 
