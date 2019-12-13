@@ -75,7 +75,7 @@ needed packages.
 4. When prompted, type `y` and press enter to finish setting up the environment. 
 Agree to any required pop-up messages.
 5. Test the new environment by typing `activate echem` followed by the enter key.
-6. Install an editor for Python files. A good option is [Atom](https://atom.io/).
+6. Install an editor for Python files. Some good options are [Atom](https://atom.io/), [VS Code](https://code.visualstudio.com/Download), and [Spyder](https://www.spyder-ide.org).  The latter two can also be installed using Anaconda.
 6. Download all of the files from this repository onto your local machine.
 7. Follow the operating instructions below to edit and run the model.
 
